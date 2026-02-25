@@ -1,0 +1,110 @@
+route,description,groupname,stopuse,description
+(Confirm after specimen preparation completed)FIB_XS Normal FIB,NULL,FIB,NULL,Status: Post-Preparation Check. Verify the specimen after standard Focused Ion Beam (FIB) cross-section preparation is complete.
+(Discuss with customer before specimen preparation)  FIB_XS only capturesTop/ Tilt view,NULL,FIB,NULL,Status: Pre-Preparation Discussion. FIB cross-sectioning limited to capturing Top-down or Tilted views only.
+(Discuss with customer before specimen preparation) FIB_XS non-destructive,NULL,FIB,NULL,Status: Pre-Preparation Discussion. Non-destructive Focused Ion Beam (FIB) cross-section analysis.
+(Discuss with customer before specimen preparation) FIB_XS Normal FIB,NULL,FIB,NULL,Status: Pre-Preparation Discussion. Standard Focused Ion Beam (FIB) cross-section analysis.
+(For TSMC advance packaging) FIB_XS Normal FIB,NULL,FIB,NULL,Standard Focused Ion Beam (FIB) cross-section analysis tailored for TSMC advanced packaging specifications.
+(Hydra Plasma clean)  Probing,TEM,TEM,NULL,Status: Cleaning Step. Hydra Plasma cleaning followed by EasyLift (probing) specimen preparation for TEM.
+(Hydra Plasma clean) normal,TEM,TEM,NULL,Status: Cleaning Step. Hydra Plasma cleaning followed by standard FIB preparation and TEM imaging.
+(Hydra Plasma clean) normal+EDS,TEM,TEM,NULL,"Status: Cleaning Step. Hydra Plasma cleaning followed by standard FIB preparation, TEM imaging, and Energy Dispersive Spectroscopy (EDS) analysis."
+(Hydra Plasma clean) Probing+EDS,TEM,TEM,NULL,"Status: Cleaning Step. Hydra Plasma cleaning followed by EasyLift specimen preparation, TEM imaging, and EDS analysis."
+(need check)FIB_XS ALD+ Normal FIB,NULL,FIB,NULL,Status: Verification Required. Atomic Layer Deposition (ALD) coating followed by standard FIB cross-section analysis.
+(need check)FIB_XS Normal FIB,NULL,FIB,NULL,Status: Verification Required. Standard Focused Ion Beam (FIB) cross-section analysis.
+(Non-destructive)ALD+probing,NULL,TEM,NULL,Status: Non-Destructive. Atomic Layer Deposition (ALD) coating followed by EasyLift specimen preparation.
+(Non-destructive)ALD+probing+EDS,NULL,TEM,NULL,Status: Non-Destructive. ALD coating followed by EasyLift specimen preparation and EDS analysis.
+(Non-destructive)probing,NULL,TEM,NULL,Status: Non-Destructive. EasyLift (probing) specimen preparation.
+(Non-destructive)probing+EDS,NULL,TEM,NULL,Status: Non-Destructive. EasyLift (probing) specimen preparation and EDS analysis.
+(Pre-execution positioning report confirmation)FIB_XS Normal FIB,NULL,FIB,NULL,"Status: Positioning Confirmation. Standard FIB cross-section analysis, pending confirmation of the positioning report before execution."
+"(Specimen preparation completed, awaits PFIB trenching) FIB_XS Normal FIB",NULL,FIB,NULL,Status: Awaiting Next Step. Standard FIB cross-section preparation is finished; waiting for Plasma FIB (PFIB) trenching.
+3D-TEM ,TEM,TEM,NULL,Three-Dimensional Transmission Electron Microscopy (Tomography).
+3D-TEM  + EDS,TEM,TEM,NULL,Three-Dimensional Transmission Electron Microscopy combined with EDS analysis.
+ALD + normal(for PR),NULL,TEM,NULL,"Atomic Layer Deposition (ALD) followed by standard FIB preparation and TEM imaging, optimized for Photoresist (PR) materials."
+ALD + normal(for PR) + EDS,NULL,TEM,NULL,"ALD coating followed by standard FIB preparation, TEM imaging, and EDS analysis, optimized for Photoresist (PR) materials."
+ALD+(gluing-baking-marking-gilding)+DB positioning,NULL,TEM,NULL,"ALD coating, followed by specific sample prep (gluing, baking, laser marking, gold coating), and Dual Beam positioning."
+ALD+DB positioning,TEM,TEM,NULL,ALD coating followed by Dual Beam positioning.
+ALD+DB positioning +EDS,TEM,TEM,NULL,ALD coating followed by Dual Beam positioning and EDS analysis.
+ALD+EasyLift,NULL,TEM,NULL,ALD coating followed by EasyLift specimen preparation.
+ALD+EasyLift+EDS,NULL,TEM,NULL,ALD coating followed by EasyLift specimen preparation and EDS analysis.
+ALD+nomal+EELS(for LK),NULL,TEM,NULL,"ALD coating followed by standard FIB preparation, TEM imaging, and Electron Energy Loss Spectroscopy (EELS), optimized for Low-K materials."
+ALD+normal,NULL,TEM,NULL,ALD coating followed by standard FIB preparation and TEM imaging.
+ALD+normal(for LK),NULL,TEM,NULL,"ALD coating followed by standard FIB preparation and TEM imaging, optimized for Low-K materials."
+ALD+normal+EDS,NULL,TEM,NULL,"ALD coating followed by standard FIB preparation, TEM imaging, and EDS analysis."
+ALD+normal+EDS(for LK),NULL,TEM,NULL,"ALD coating, standard FIB preparation, TEM imaging, and EDS analysis, optimized for Low-K materials."
+ALD+normal+EELS,NULL,TEM,NULL,"ALD coating followed by standard FIB preparation, TEM imaging, and EELS analysis."
+ALD+positioning+probing,NULL,TEM,NULL,"ALD coating, specific positioning steps, followed by EasyLift (probing) preparation."
+ALD+positioning+second ALD+normal,NULL,TEM,NULL,"ALD coating, positioning, a second layer of ALD coating, followed by standard FIB preparation and TEM imaging."
+ALD+positioning+second ALD+normal+EDS,NULL,TEM,NULL,"ALD coating, positioning, second ALD coating, standard FIB preparation, TEM imaging, and EDS analysis."
+ALD+positioning+second ALD+probing,NULL,TEM,NULL,"ALD coating, positioning, second ALD coating, followed by EasyLift (probing) preparation."
+ALD+positioning+second ALD+probing+EDS,NULL,TEM,NULL,"ALD coating, positioning, second ALD coating, EasyLift preparation, and EDS analysis."
+ALD+Probing,NULL,TEM,NULL,ALD coating followed by EasyLift (probing) specimen preparation.
+ALD+probing(Special method),NULL,TEM,NULL,ALD coating followed by EasyLift specimen preparation using a specialized custom method.
+ALD+probing+EDS,TEM,TEM,NULL,ALD coating followed by EasyLift specimen preparation and EDS analysis.
+ALD+probing+EDS(Special method),NULL,TEM,NULL,ALD coating followed by EasyLift specimen preparation and EDS analysis using a specialized custom method.
+ALD+TEM+EELS,NULL,TEM,NULL,ALD coating followed by TEM imaging and EELS analysis.
+ALD+TEM+EELS(for LK),NULL,TEM,NULL,"ALD coating followed by TEM imaging and EELS analysis, optimized for Low-K materials."
+ALD+TEM+EELS+EDS,NULL,TEM,NULL,"ALD coating followed by TEM imaging, EELS, and EDS analysis."
+ALD+TEM+EELS+EDS(for LK),NULL,TEM,NULL,"ALD coating followed by TEM imaging, EELS, and EDS analysis, optimized for Low-K materials."
+ALD+TOP view+ TEM,NULL,TEM,NULL,"ALD coating, Top-down view inspection, followed by TEM imaging."
+ALD+Top view+second ALD+TEM,NULL,TEM,NULL,"ALD coating, Top-down view inspection, a second ALD coating, followed by TEM imaging."
+ALD+TOP view+TEM+EDS,NULL,TEM,NULL,"ALD coating, Top-down view inspection, TEM imaging, and EDS analysis."
+ALD+Topview+ second ALD+TEM+EDS,NULL,TEM,NULL,"ALD coating, Top-down view inspection, second ALD coating, TEM imaging, and EDS analysis."
+ALD+TOPVIEW+second ALD+probing,NULL,TEM,NULL,"ALD coating, Top-down view inspection, second ALD coating, followed by EasyLift (probing) preparation."
+ALD+TOPVIEW+second ALD+probing+EDS,NULL,TEM,NULL,"ALD coating, Top-down view inspection, second ALD coating, EasyLift preparation, and EDS analysis."
+DB positioning + Probing,NULL,"TEM,FIB",NULL,Dual Beam positioning followed by EasyLift (probing) preparation.
+Delayer+TEM,NULL,TEM,NULL,Sample de-layering followed by TEM imaging.
+Delayer+TEM+EDS,NULL,TEM,NULL,Sample de-layering followed by TEM imaging and EDS analysis.
+FIB_XS ALD+ Normal FIB,FIB_XS,FIB,NULL,ALD coating followed by standard FIB cross-section analysis.
+FIB_XS ALD+ Normal FIB(Positioning + Gluing),NULL,FIB,NULL,"ALD coating followed by standard FIB cross-section analysis, explicitly including positioning and gluing steps."
+FIB_XS ALD+ Normal FIB(Positioning),NULL,FIB,NULL,"ALD coating followed by standard FIB cross-section analysis, explicitly including positioning."
+FIB_XS measuring,FIB_XS,"FIB,PFA",NULL,FIB cross-sectioning specifically for dimensional metrology/measuring.
+FIB_XS non-destructive,FIB_XS,FIB,NULL,Non-destructive FIB cross-section analysis.
+FIB_XS Normal FIB,FIB_XS,"FIB,PFA",NULL,Standard Focused Ion Beam (FIB) cross-section analysis.
+FIB_XS Normal FIB(Positioning + Gluing),NULL,FIB,NULL,Standard FIB cross-section analysis explicitly including positioning and gluing steps.
+FIB_XS Normal FIB(Positioning),NULL,FIB,NULL,Standard FIB cross-section analysis explicitly including positioning.
+FIB_XS OM observe/ Laser mark positioning,FIB_XS,FIB,NULL,FIB cross-sectioning assisted by Optical Microscope (OM) observation and Laser marking for positioning.
+FIB_XS only analyze EDS,FIB_XS,FIB,NULL,FIB cross-sectioning performed specifically for EDS analysis (no high-res imaging focus).
+FIB_XS only captures Top/ Tilt view,FIB_XS,FIB,NULL,FIB cross-sectioning limited to capturing Top-down or Tilted views.
+FIB_XS PVD+ Normal FIB,FIB_XS,FIB,NULL,Physical Vapor Deposition (PVD) coating followed by standard FIB cross-section analysis.
+Needs DB positioning- T003,NULL,TEM,NULL,Requires Dual Beam positioning following protocol T003.
+Needs DB positioning+normal+EDS,TEM,TEM,NULL,"Requires Dual Beam positioning followed by standard FIB preparation, TEM imaging, and EDS analysis."
+nomal+EDS(for LK),NULL,TEM,NULL,"Standard FIB preparation, TEM imaging, and EDS analysis, optimized for Low-K materials."
+normal-T001,NULL,TEM,NULL,Standard FIB preparation and TEM imaging following protocol T001.
+normal(for LK),NULL,TEM,NULL,Standard FIB preparation and TEM imaging optimized for Low-K materials.
+normal(for PR),NULL,TEM,NULL,Standard FIB preparation and TEM imaging optimized for Photoresist (PR) materials.
+normal(for PR) + EDS,NULL,TEM,NULL,"Standard FIB preparation, TEM imaging, and EDS analysis, optimized for Photoresist (PR) materials."
+normal+EDS - T002,NULL,TEM,NULL,"Standard FIB preparation, TEM imaging, and EDS analysis following protocol T002."
+On-site capturing TOP VIEW confirmation，Free charge,,TEM,NULL,On-site confirmation by capturing a Top-down view (provided at no additional cost).
+Only ALD,TSMC,"TEM,ALD",NULL,Service limited to Atomic Layer Deposition (ALD) only.
+Only analyze EDS,NULL,TEM,NULL,Service limited to EDS analysis only (no imaging or prep).
+Only capture TEM images,NULL,TEM,NULL,Service limited to TEM imaging only (sample assumed ready).
+Only capture TOP VIEW,NULL,TEM,NULL,Service limited to capturing Top-down views only.
+Outsource analysis,Outsource analysis,ALL,NULL,Analysis to be conducted by an external third-party laboratory.
+PFIB + SDB,NULL,FIB,NULL,Plasma FIB (PFIB) combined with Standard Dual Beam (SDB) processing.
+positioning+probing,NULL,TEM,NULL,Positioning steps followed by EasyLift (probing) preparation.
+probing- T006,NULL,TEM,NULL,EasyLift (probing) specimen preparation following protocol T006.
+probing(for LK),NULL,TEM,TRUE,EasyLift (probing) specimen preparation optimized for Low-K materials.
+probing(special method),NULL,TEM,NULL,EasyLift (probing) specimen preparation using a specialized custom method.
+Probing+EDS,NULL,TEM,NULL,EasyLift (probing) specimen preparation followed by EDS analysis.
+probing+EDS(Special method),NULL,TEM,NULL,EasyLift (probing) specimen preparation and EDS analysis using a specialized custom method.
+Probing+EELS,NULL,TEM,NULL,EasyLift (probing) specimen preparation followed by EELS analysis.
+Pt coating,NULL,"FIB,SEM",FALSE,Platinum (Pt) deposition/coating.
+Special specimen preparation+ALD+normal,NULL,TEM,NULL,"Specialized custom specimen preparation, followed by ALD coating, standard FIB prep, and TEM imaging."
+Special specimen preparation+ALD+normal(for LK),NULL,TEM,NULL,"Specialized specimen preparation, ALD coating, standard FIB prep, and TEM imaging, optimized for Low-K materials."
+Special specimen preparation+ALD+normal(for PR),NULL,TEM,NULL,"Specialized specimen preparation, ALD coating, standard FIB prep, and TEM imaging, optimized for Photoresist (PR)."
+Special specimen preparation+ALD+normal+EDS(for LK),NULL,TEM,NULL,"Specialized specimen preparation, ALD coating, standard FIB prep, TEM imaging, and EDS, optimized for Low-K materials."
+Special specimen preparation+ALD+normal+EDS(for PR),NULL,TEM,NULL,"Specialized specimen preparation, ALD coating, standard FIB prep, TEM imaging, and EDS, optimized for Photoresist (PR)."
+Special specimen preparation+ALD+probing,NULL,TEM,NULL,Specialized specimen preparation followed by ALD coating and EasyLift (probing) preparation.
+Special specimen preparation+normal,NULL,TEM,NULL,Specialized specimen preparation followed by standard FIB prep and TEM imaging.
+Special specimen preparation+normal+EDS,TEM,TEM,NULL,"Specialized specimen preparation followed by standard FIB prep, TEM imaging, and EDS analysis."
+Special specimen preparation+probing,NULL,TEM,NULL,Specialized specimen preparation followed by EasyLift (probing) preparation.
+Speicial specimen preparation+ALD+normal+EDS,TEM,TEM,NULL,"Specialized specimen preparation, ALD coating, standard FIB prep, TEM imaging, and EDS analysis."
+TEM+EELS,NULL,TEM,NULL,Transmission Electron Microscopy (TEM) imaging and EELS analysis.
+TEM+EELS(for LK),NULL,TEM,NULL,TEM imaging and EELS analysis optimized for Low-K materials.
+TEM+EELS+EDS,NULL,TEM,NULL,"TEM imaging, EELS analysis, and EDS analysis."
+TEM+EELS+EDS(for LK),NULL,TEM,NULL,"TEM imaging, EELS analysis, and EDS analysis optimized for Low-K materials."
+Top view+ALD(for LK),NULL,TEM,NULL,"Top-down view inspection and ALD coating, optimized for Low-K materials."
+Top view+ALD(for LK)+EDS,NULL,TEM,NULL,"Top-down view inspection, ALD coating (for Low-K), and EDS analysis."
+TOP view+ALD+normal,NULL,TEM,NULL,"Top-down view inspection, ALD coating, followed by standard FIB preparation and TEM imaging."
+TOP view+TEM,NULL,TEM,NULL,Top-down view inspection followed by TEM imaging.
+TOP view+TEM+EDS,NULL,TEM,NULL,"Top-down view inspection, TEM imaging, and EDS analysis."
+Wet etching+ALD+normal,NULL,TEM,NULL,"Wet chemical etching, followed by ALD coating, standard FIB preparation, and TEM imaging."

@@ -1,0 +1,643 @@
+[
+        {
+        "mail_id": "1892a8a486494bbe8e64e015389641c8",
+        "email_subject": "RE: MSS US TEM Request",
+        "company_name": "TEL",
+        "customer_name": "Hailey Jenkins",
+        "samples": [
+            {
+                "lot_id": "T25111801-001",
+                "wafer_id": "OPL17-001",
+                "prepare": "ALD(W2-A)+M-Bond(60/30)+FIB+TEM",
+                "route": "ALD+normal",
+                "loctestkey": "23P-Y-CUT"
+            },
+            {
+                "lot_id": "T25111801-002",
+                "wafer_id": "OPL17-002",
+                "prepare": "ALD(W2-A)+M-Bond(60/30)+FIB+TEM",
+                "route": "ALD+normal",
+                "loctestkey": "23P-Y-CUT"
+            },
+            {
+                "lot_id": "T25111801-003",
+                "wafer_id": "OPL17-003",
+                "prepare": "ALD(W2-A)+M-Bond(60/30)+FIB+TEM",
+                "route": "ALD+normal",
+                "loctestkey": "23P-Y-CUT"
+            },
+            {
+                "lot_id": "T25111801-004",
+                "wafer_id": "OPL17-004",
+                "prepare": "ALD(W2-A)+M-Bond(60/30)+FIB+TEM",
+                "route": "ALD+normal",
+                "loctestkey": "23P-Y-CUT"
+            }
+        ]
+    },
+    {
+        "mail_id": "1a2d6c23b7d94e378933e5358e22d107",
+        "email_subject": "FW: UPS Ship Notification, Tracking Number 1Z0EA7310198886975",
+        "company_name": "TEL",
+        "customer_name": "Kang Yi Lin",
+        "samples": [
+            {
+                "lot_id": "T25111203-001",
+                "wafer_id": "2538ESNE013.005",
+                "prepare": "ALD(W2-A)+M-Bond(60/30)+FIB+TEM",
+                "route": "ALD+normal",
+                "loctestkey": "T2T 36P Gap20nm-X-cut"
+            },
+            {
+                "lot_id": "T25111203-002",
+                "wafer_id": "2538ESNE013.000",
+                "prepare": "ALD(W2-A)+M-Bond(60/30)+FIB+TEM",
+                "route": "ALD+normal",
+                "loctestkey": "T2T 36P Gap20nm-X-cut"
+            },
+            {
+                "lot_id": "T25111203-003",
+                "wafer_id": "2538ESNE013.000",
+                "prepare": "ALD(W2-A)+M-Bond(60/30)+FIB(Normal cut/Ex-Situ)+TEM",
+                "route": "ALD+normal",
+                "loctestkey": "T2T 36P Gap20nm-Y-cut"
+            }
+        ]
+    },
+    {
+        "mail_id": "1cc501c4f68a45f18b87f12fef79b483",
+        "email_subject": "FW: UPS Ship Notification, Tracking Number 1Z0EA7310192090095",
+        "company_name": "TEL",
+        "customer_name": "Kang Yi Lin",
+        "samples": [
+            {
+                "lot_id": "T25112001-001",
+                "wafer_id": "MSS_ES_Kangyi_TT2-SN-014",
+                "prepare": "SEM check and marking+ ALD(W2-A)+M-Bond+FIB(Normal cut)+TEM",
+                "route": "ALD+normal",
+                "loctestkey": "T2T 36P Gap20nm-X-cut"
+            },
+            {
+                "lot_id": "T25112001-002",
+                "wafer_id": "MSS_ES_Kangyi_TT2-SN-014",
+                "prepare": "SEM check and marking+ ALD(W2-A)+M-Bond+FIB(Normal cut)+TEM",
+                "route": "ALD+normal",
+                "loctestkey": "T2T 36P Gap20nm-Y-cut"
+            }
+        ]
+    },
+    {
+        "mail_id": "1ef7fdaef479428081874e9a3330dc23",
+        "email_subject": "RE: test sample for glue",
+        "company_name": "230.0",
+        "customer_name": "Daivd",
+        "samples": [
+            {
+                "lot_id": "T25071401-001",
+                "wafer_id": "defect practice-1",
+                "prepare": "Pre-prep + DB + probing + TEM",
+                "route": "probing- T006",
+                "loctestkey": "Blank"
+            },
+            {
+                "lot_id": "T25071401-002",
+                "wafer_id": "defect practice-2",
+                "prepare": "Pre-prep + DB + probing + TEM",
+                "route": "probing- T006",
+                "loctestkey": "Blank"
+            },
+            {
+                "lot_id": "T25071401-003",
+                "wafer_id": "ALD+1:1:10 test-1",
+                "prepare": "ALD(low-Temp-W7-L20) +1:1:10+EDS",
+                "route": "ALD+normal+EDS",
+                "loctestkey": "Blank"
+            },
+            {
+                "lot_id": "T25071401-004",
+                "wafer_id": "ALD+1:1:10 test-2",
+                "prepare": " ALD(low-Temp-W7-L30) +1:1:10+EDS",
+                "route": "ALD+normal+EDS",
+                "loctestkey": "Blank"
+            }
+        ]
+    },
+    {
+        "mail_id": "2f3ab851416a4c8eb95230483c2ac667",
+        "email_subject": "FW: MSS USA TEM Request",
+        "company_name": "TEL",
+        "customer_name": "Hailey Jenkins",
+        "samples": [
+            {
+                "lot_id": "T25100901-001",
+                "wafer_id": "M3V2-007R",
+                "prepare": "ALD(W2-A) + M-bond(60/30) ",
+                "route": "ALD+Probing",
+                "loctestkey": "23P-Xcut"
+            },
+            {
+                "lot_id": "T25100901-002",
+                "wafer_id": "M3V2-011R",
+                "prepare": "ALD(W2-A) + M-bond(60/30) ",
+                "route": "ALD+normal",
+                "loctestkey": "23P-Xcut"
+            },
+            {
+                "lot_id": "T25100901-003",
+                "wafer_id": "M3V2-018",
+                "prepare": "ALD(W2-A) + M-bond(60/30) ",
+                "route": "ALD+Probing",
+                "loctestkey": "23P-Xcut"
+            },
+            {
+                "lot_id": "T25100901-004",
+                "wafer_id": "M3V2-019",
+                "prepare": "ALD(W2-A) + M-bond(60/30) ",
+                "route": "ALD+Probing",
+                "loctestkey": "23P-Xcut"
+            },
+            {
+                "lot_id": "T25100901-005",
+                "wafer_id": "ODC-BKM-025",
+                "prepare": "ALD(W2-A) + M-bond(60/30) ",
+                "route": "ALD+Probing",
+                "loctestkey": "23P-Xcut"
+            },
+            {
+                "lot_id": "T25100901-006",
+                "wafer_id": "ODC-BKM-031",
+                "prepare": "ALD(W2-A) + M-bond(60/30) ",
+                "route": "ALD+Probing",
+                "loctestkey": "23P-Xcut"
+            },
+            {
+                "lot_id": "T25100901-007",
+                "wafer_id": "ODC-BKM-032",
+                "prepare": "ALD(W2-A) + M-bond(60/30) ",
+                "route": "ALD+Probing",
+                "loctestkey": "23P-Xcut"
+            }
+        ]
+    },
+    {
+        "mail_id": "5acf697716b34a9e83d6131c789dc45a",
+        "email_subject": "MSS US TEM Request",
+        "company_name": "TEL",
+        "customer_name": "Hailey Jenkins",
+        "samples": [
+            {
+                "lot_id": "T25102201-001",
+                "wafer_id": "M2V1-027C",
+                "prepare": "ALD(mid-temp-W2-A) + M-bond(60/30) + FIB + TEM",
+                "route": "ALD+normal",
+                "loctestkey": "45P-Ycut"
+            },
+            {
+                "lot_id": "T25102201-002",
+                "wafer_id": "M2V1-027E",
+                "prepare": "ALD(mid-temp-W2-A) + M-bond(60/30) + FIB + TEM",
+                "route": "ALD+normal",
+                "loctestkey": "45P-Ycut"
+            },
+            {
+                "lot_id": "T25102201-003",
+                "wafer_id": "M2V1-028E",
+                "prepare": "ALD(mid-temp-W2-A) + M-bond(60/30) + FIB + TEM",
+                "route": "ALD+normal",
+                "loctestkey": "45P-Ycut"
+            },
+            {
+                "lot_id": "T25102201-004",
+                "wafer_id": "M2V1-029E",
+                "prepare": "ALD(mid-temp-W2-A) + M-bond(60/30) + FIB + TEM",
+                "route": "ALD+normal",
+                "loctestkey": "45P-Ycut"
+            },
+            {
+                "lot_id": "T25102201-005",
+                "wafer_id": "M2V1-030E",
+                "prepare": "ALD(mid-temp-W2-A) + M-bond(60/30) + FIB + TEM",
+                "route": "ALD+normal",
+                "loctestkey": "45P-Ycut"
+            },
+            {
+                "lot_id": "T25102201-006",
+                "wafer_id": "M2V1-031E",
+                "prepare": "ALD(mid-temp-W2-A) + M-bond(60/30) + FIB + TEM",
+                "route": "ALD+normal",
+                "loctestkey": "45P-Ycut"
+            },
+            {
+                "lot_id": "T25102201-007",
+                "wafer_id": "M2V1-032E",
+                "prepare": "ALD(mid-temp-W2-A) + M-bond(60/30) + FIB + TEM",
+                "route": "ALD+normal",
+                "loctestkey": "45P-Ycut"
+            }
+        ]
+    },
+    {
+        "mail_id": [
+            "7cd544a7392d4badb62369d607dc6571",
+            "699ed5fb61dd4934b60b0bb6a46135a7"
+        ],
+        "email_subject": "RE: weekly-2544-MSS weekly EDX monitor(2025_US)",
+        "company_name": "MSS US EXP",
+        "customer_name": "Gin",
+        "samples": [
+            {
+                "lot_id": "T25110302-001",
+                "wafer_id": "Weekly",
+                "prepare": "Only EDS",
+                "route": "Only analyze EDS",
+                "loctestkey": "2545 US-TALOS-24 Only EDS"
+            },
+            {
+                "lot_id": "T25110302-002",
+                "wafer_id": "Weekly",
+                "prepare": "Only EDS",
+                "route": "Only analyze EDS",
+                "loctestkey": "2545 US-TALOS-25 Only EDS"
+            }
+        ]
+    },
+    {
+        "mail_id": [
+            "adda391dcf6a490884e6d64d55fb96ac",
+            "7df405a48998475093eba550db2149e8",
+            "eea9f7539d7a465fb609aa4dddc6060c"
+        ],
+        "email_subject": [
+            "RE: T25100101-002-TEL-Kang Yi Lin-25SK01-G201-3-Macro 3G Y-cut",
+            "FW: Three samples to MSS USA for TEM image demo"
+        ],
+        "company_name": "TEL",
+        "customer_name": [
+            "Matt Flaugh",
+            "Kang Yi Lin",
+            "Hailey Jenkins"
+        ],
+        "samples": [
+            {
+                "lot_id": "T25100101-003",
+                "wafer_id": "M3V2-012",
+                "prepare": "Top view+ALD(W2-A) + M-bond(60/30) ",
+                "route": "ALD+Probing",
+                "loctestkey": "23P-Xcut"
+            },
+            {
+                "lot_id": "T25100101-001",
+                "wafer_id": "MSS_ES_Kangyi_CAFF_CAv5-D",
+                "prepare": "ALD(W2-A) +DB+ M-bond(60/30) + Probing",
+                "route": "ALD+Probing",
+                "loctestkey": "DUT2 X-Cut"
+            },
+            {
+                "lot_id": "T25100101-002",
+                "wafer_id": "25SK01-G201-3",
+                "prepare": "ALD(W2-A) + M-bond(60/30) ",
+                "route": "ALD+normal",
+                "loctestkey": "Macro 3G Y-cut"
+            },
+            {
+                "lot_id": "T25100101-004",
+                "wafer_id": "25SK01-G201-3",
+                "prepare": "ALD(W2-A) + M-bond(60/30) ",
+                "route": "ALD+normal",
+                "loctestkey": "Macro 3G Y-cut"
+            }
+        ]
+    },
+    {
+        "mail_id": "95064ffa15834fc99d65ab58e4d6ceb8",
+        "email_subject": "MSS US TEM Request",
+        "company_name": "TEL",
+        "customer_name": "Hailey Jenkins",
+        "samples": [
+            {
+                "lot_id": "T25110301-001",
+                "wafer_id": "M2V1-033",
+                "prepare": "ALD(mid-temp-W2-A) + M-bond(60/30) + FIB + TEM",
+                "route": "ALD+normal",
+                "loctestkey": "45P-Y-CUT"
+            },
+            {
+                "lot_id": "T25110301-002",
+                "wafer_id": "M2V1-034",
+                "prepare": "ALD(mid-temp-W2-A) + M-bond(60/30) + FIB + TEM",
+                "route": "ALD+normal",
+                "loctestkey": "45P-Y-CUT"
+            },
+            {
+                "lot_id": "T25110301-003",
+                "wafer_id": "M2V1-035",
+                "prepare": "ALD(mid-temp-W2-A) + M-bond(60/30) + FIB + TEM",
+                "route": "ALD+normal",
+                "loctestkey": "45P-X-CUT"
+            },
+            {
+                "lot_id": "T25110301-004",
+                "wafer_id": "M2V1-036",
+                "prepare": "ALD(mid-temp-W2-A) + M-bond(60/30) + FIB + TEM",
+                "route": "ALD+normal",
+                "loctestkey": "45P-X-CUT"
+            },
+            {
+                "lot_id": "T25110301-005",
+                "wafer_id": "M2V1-037",
+                "prepare": "ALD(mid-temp-W2-A) + M-bond(60/30) + FIB + TEM",
+                "route": "ALD+normal",
+                "loctestkey": "45P-X-CUT"
+            },
+            {
+                "lot_id": "T25110301-006",
+                "wafer_id": "M2V1-038",
+                "prepare": "ALD(mid-temp-W2-A) + M-bond(60/30) + FIB + TEM",
+                "route": "ALD+normal",
+                "loctestkey": "45P-X-CUT"
+            }
+        ]
+    },
+    {
+        "mail_id": [
+            "a6eba2a61a484a359b4b58e5ebf7de15",
+            "cc52f1d4f9584c1a9311702d13b3e03a",
+            "9f7598db5596445f989938ec4d268161"
+        ],
+        "email_subject": [
+            "MSS analysis report_T25061901-002_first email",
+            "RE: MSS analysis report_T25061901-002_second email"
+        ],
+        "company_name": "MSS US EXP",
+        "customer_name": "Kevin",
+        "samples": [
+            {
+                "lot_id": "T25061901-001",
+                "wafer_id": "J6",
+                "prepare": "Pi-bond(60/30) + FIB + TEM",
+                "route": "normal-T001",
+                "loctestkey": "60-20-03"
+            },
+            {
+                "lot_id": "T25061901-002",
+                "wafer_id": "J6",
+                "prepare": "same-001",
+                "route": "normal-T001",
+                "loctestkey": "80-20-04"
+            }
+        ]
+    },
+    {
+        "mail_id": [
+            "d96e0f4206944796864d74696a8a7482",
+            "a4e8cb26a1ac4e83944e7c95c4ab978c"
+        ],
+        "email_subject": [
+            "ALD and glue testing",
+            "RE: ALD and glue testing"
+        ],
+        "company_name": "MSS US EXP",
+        "customer_name": "Jimmy",
+        "samples": [
+            {
+                "lot_id": "T25072201-001",
+                "wafer_id": "Test sample1",
+                "prepare": "ALD(low-Temp-W2-B) + M-bond(60/30) + FIB + TEM + EDS",
+                "route": "ALD+normal+EDS",
+                "loctestkey": "Blank-1"
+            },
+            {
+                "lot_id": "T25072201-002",
+                "wafer_id": "Test sample2",
+                "prepare": "ALD(low-Temp-W7-B) + Pi-bond(60/30) + FIB + TEM + EDS",
+                "route": "ALD+normal+EDS",
+                "loctestkey": "Blank-2"
+            }
+        ]
+    },
+    {
+        "mail_id": "b12723f4119144499ee5e0b724003623",
+        "email_subject": "FW: UPS Package Delivered: 1Z0EA7310190207776",
+        "company_name": "TEL",
+        "customer_name": "Hailey Jenkins",
+        "samples": [
+            {
+                "lot_id": "T25120101-001",
+                "wafer_id": "M3V2-032",
+                "prepare": "ALD(mid-temp-W2-A) + M-bond(60/30) + FIB + TEM",
+                "route": "ALD+normal",
+                "loctestkey": "23P X-CUT"
+            },
+            {
+                "lot_id": "T25120101-002",
+                "wafer_id": "M3V2-033",
+                "prepare": "ALD(mid-temp-W2-A) + M-bond(60/30) + FIB + TEM",
+                "route": "ALD+normal",
+                "loctestkey": "23P X-CUT"
+            },
+            {
+                "lot_id": "T25120101-003",
+                "wafer_id": "M3V2-034",
+                "prepare": "ALD(mid-temp-W2-A) + M-bond(60/30) + FIB + TEM",
+                "route": "ALD+normal",
+                "loctestkey": "23P Y-CUT"
+            },
+            {
+                "lot_id": "T25120101-004",
+                "wafer_id": "M3V2-035",
+                "prepare": "ALD(mid-temp-W2-A) + M-bond(60/30) + FIB + TEM",
+                "route": "ALD+normal",
+                "loctestkey": "23P Y-CUT"
+            },
+            {
+                "lot_id": "T25120101-005",
+                "wafer_id": "M3V2-036",
+                "prepare": "ALD(mid-temp-W2-A) + M-bond(60/30) + FIB + TEM",
+                "route": "ALD+normal",
+                "loctestkey": "23P Y-CUT"
+            },
+            {
+                "lot_id": "T25120101-006",
+                "wafer_id": "M3V2-037",
+                "prepare": "ALD(mid-temp-W2-A) + M-bond(60/30) + FIB + TEM",
+                "route": "ALD+normal",
+                "loctestkey": "23P Y-CUT"
+            },
+            {
+                "lot_id": "T25120101-007",
+                "wafer_id": "M3V2-013",
+                "prepare": "ALD(mid-temp-W2-A) + M-bond(60/30) + FIB + TEM",
+                "route": "ALD+normal",
+                "loctestkey": "23P X-CUT"
+            },
+            {
+                "lot_id": "T25120101-008",
+                "wafer_id": "M2V1-017R2",
+                "prepare": "ALD(mid-temp-W2-A) + M-bond(60/30) + FIB + TEM",
+                "route": "ALD+normal",
+                "loctestkey": "23P Y-CUT"
+            }
+        ]
+    },
+    {
+        "mail_id": [
+            "e57f0b3506dd4c95b7483f98435c95f4",
+            "c1415f62478a40318db7e9301be8283e"
+        ],
+        "email_subject": "FW: S/TEM imaging request",
+        "company_name": "TSS",
+        "customer_name": "Wingo Wong",
+        "samples": [
+            {
+                "lot_id": "T25090902-001",
+                "wafer_id": "TSS10463",
+                "prepare": "nan",
+                "route": "Only capture TEM images",
+                "loctestkey": "Lamella on Finger 5"
+            }
+        ]
+    },
+    {
+        "mail_id": "c24e6d564e554353acd51b5274ee3798",
+        "email_subject": "FW: MSS USA TEM Request",
+        "company_name": "TEL",
+        "customer_name": "Hailey Jenkins",
+        "samples": [
+            {
+                "lot_id": "T25101301-001",
+                "wafer_id": "M3v2-020",
+                "prepare": "ALD(W2-A) + M-bond(60/30) ",
+                "route": "ALD+Probing",
+                "loctestkey": "23P X-CUT"
+            },
+            {
+                "lot_id": "T25101301-002",
+                "wafer_id": "M3v2-021",
+                "prepare": "ALD(W2-A) + M-bond(60/30) ",
+                "route": "ALD+Probing",
+                "loctestkey": "23P X-CUT"
+            },
+            {
+                "lot_id": "T25101301-003",
+                "wafer_id": "M3v2-022",
+                "prepare": "ALD(W2-A) + M-bond(60/30) ",
+                "route": "ALD+Probing",
+                "loctestkey": "23P X-CUT"
+            },
+            {
+                "lot_id": "T25101301-004",
+                "wafer_id": "M3v2-023",
+                "prepare": "ALD(W2-A) + M-bond(60/30) ",
+                "route": "ALD+Probing",
+                "loctestkey": "23P X-CUT"
+            },
+            {
+                "lot_id": "T25101301-005",
+                "wafer_id": "M3v2-025",
+                "prepare": "ALD(W2-A) + M-bond(60/30) ",
+                "route": "ALD+Probing",
+                "loctestkey": "23P X-CUT"
+            },
+            {
+                "lot_id": "T25101301-006",
+                "wafer_id": "ODC-BKM-033",
+                "prepare": "ALD(W2-A) + M-bond(60/30) ",
+                "route": "ALD+Probing",
+                "loctestkey": "23P X-CUT"
+            },
+            {
+                "lot_id": "T25101301-007",
+                "wafer_id": "ODC-BKM-034",
+                "prepare": "ALD(W2-A) + M-bond(60/30) ",
+                "route": "ALD+Probing",
+                "loctestkey": "23P X-CUT"
+            },
+            {
+                "lot_id": "T25101301-008",
+                "wafer_id": "ODC-BKM-035",
+                "prepare": "ALD(W2-A) + M-bond(60/30) ",
+                "route": "ALD+Probing",
+                "loctestkey": "23P X-CUT"
+            },
+            {
+                "lot_id": "T25101301-009",
+                "wafer_id": "ODC-BKM-036",
+                "prepare": "ALD(W2-A) + M-bond(60/30) ",
+                "route": "ALD+Probing",
+                "loctestkey": "23P X-CUT"
+            },
+            {
+                "lot_id": "T25101301-010",
+                "wafer_id": "ODC-BKM-037",
+                "prepare": "ALD(W2-A) + M-bond(60/30) ",
+                "route": "ALD+Probing",
+                "loctestkey": "23P X-CUT"
+            },
+            {
+                "lot_id": "T25101301-011",
+                "wafer_id": "ODC-BKM-038",
+                "prepare": "ALD(W2-A) + M-bond(60/30) ",
+                "route": "ALD+Probing",
+                "loctestkey": "23P X-CUT"
+            }
+        ]
+    },
+    {
+        "mail_id": "c4fa1a958a304b11b8749c298c09eced",
+        "email_subject": "RE: QCOM Craig Sc_film for analysis 20251028",
+        "company_name": "Qualcomm",
+        "customer_name": "Craig Core",
+        "samples": [
+            {
+                "lot_id": "T25103001-001",
+                "wafer_id": "E637A-31 slot 21 e31=3.1 #5-5",
+                "prepare": "nan",
+                "route": "Probing+EDS",
+                "loctestkey": "edge"
+            },
+            {
+                "lot_id": "T25103001-002",
+                "wafer_id": "E637A-39 slot 21 e31=3.2 #3/17",
+                "prepare": "nan",
+                "route": "Probing+EDS",
+                "loctestkey": "edge"
+            },
+            {
+                "lot_id": "T25103001-003",
+                "wafer_id": "E637A-31 slot 20 e31=3.7 #5/7",
+                "prepare": "nan",
+                "route": "Probing+EDS",
+                "loctestkey": "edge"
+            }
+        ]
+    },
+    {
+        "mail_id": "fd2f32a9ccf94fca82781d5b796a13ef",
+        "email_subject": "Glue dry test sample",
+        "company_name": "MSS US EXP",
+        "customer_name": "David",
+        "samples": [
+            {
+                "lot_id": "T25071701-001",
+                "wafer_id": "Sample1",
+                "prepare": "M-bond(60/30)+topview",
+                "route": "Only capture TOP VIEW",
+                "loctestkey": "Blank"
+            },
+            {
+                "lot_id": "T25071701-002",
+                "wafer_id": "Sample2",
+                "prepare": "M-bond(120/30)+topview",
+                "route": "Only capture TOP VIEW",
+                "loctestkey": "Blank"
+            },
+            {
+                "lot_id": "T25071701-003",
+                "wafer_id": "Sample3",
+                "prepare": "M-bond(60/60)+topview",
+                "route": "Only capture TOP VIEW",
+                "loctestkey": "Blank"
+            }
+        ]
+    }
+]

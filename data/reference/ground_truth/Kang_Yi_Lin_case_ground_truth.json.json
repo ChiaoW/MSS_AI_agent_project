@@ -1,0 +1,770 @@
+{
+  "T26020371": {
+    "samples": [
+      {
+        "lot_id": "T26020371-006",
+        "wafer_id": "MSS_ES_Kangyi_CAFF-029",
+        "prepare": "",
+        "route": "ALD+probing",
+        "loctestkey": "DUT4 (Y-cut)"
+      },
+      {
+        "lot_id": "T26020371-005",
+        "wafer_id": "MSS_ES_Kangyi_CAFF-029",
+        "prepare": "",
+        "route": "ALD+probing",
+        "loctestkey": "DUT2 (X-cut on nFET)"
+      },
+      {
+        "lot_id": "T26020371-004",
+        "wafer_id": "MSS_ES_Kangyi_CAFF-029a",
+        "prepare": "ALD(W2-35cyc) + 定位 + M-bond(60/30) + Probing",
+        "route": "ALD+DB定位+probing",
+        "loctestkey": "DUT3"
+      },
+      {
+        "lot_id": "T26020371-003",
+        "wafer_id": "MSS_ES_Kangyi_CAFF-029a",
+        "prepare": "ALD(W2-35cyc) + 定位 + M-bond(60/30) + Probing",
+        "route": "ALD+DB定位+probing",
+        "loctestkey": "DUT1"
+      },
+      {
+        "lot_id": "T26020371-002",
+        "wafer_id": "MSS_ES_Kangyi_CAFF-029",
+        "prepare": "ALD(W2-35cyc) + 定位 + M-bond(60/30) + Probing",
+        "route": "ALD+DB定位+probing",
+        "loctestkey": "DUT3"
+      },
+      {
+        "lot_id": "T26020371-001",
+        "wafer_id": "MSS_ES_Kangyi_CAFF-029",
+        "prepare": "ALD(W2-35cyc) + 定位 + M-bond(60/30) + Probing",
+        "route": "ALD+DB定位+probing",
+        "loctestkey": "DUT1"
+      }
+    ]
+  },
+  "T25122302": {
+    "samples": [
+      {
+        "lot_id": "T25122302-004",
+        "wafer_id": "MSS_ES_Kangyi_CAFF-021e",
+        "prepare": "ALD(W2-35cyc) + topview + Pi-bond(60/30)",
+        "route": "ALD+DB定位+normal",
+        "loctestkey": "NHL Y-cut"
+      },
+      {
+        "lot_id": "T25122302-003",
+        "wafer_id": "MSS_ES_Kangyi_CAFF-021c",
+        "prepare": "ALD(W2-35cyc) + topview + Pi-bond(60/30)",
+        "route": "ALD+DB定位+normal",
+        "loctestkey": "NHL Y-cut"
+      },
+      {
+        "lot_id": "T25122302-002",
+        "wafer_id": "MSS_ES_Kangyi_CAFF-021a",
+        "prepare": "ALD(W2-35cyc) + topview + Pi-bond(60/30)",
+        "route": "ALD+DB定位+normal",
+        "loctestkey": "NHL Y-cut"
+      },
+      {
+        "lot_id": "T25122302-001",
+        "wafer_id": "MSS_ES_Kangyi_CAFF-021",
+        "prepare": "ALD(W2-35cyc) + topview + Pi-bond(60/30)",
+        "route": "ALD+DB定位+normal",
+        "loctestkey": "NHL Y-cut"
+      }
+    ]
+  },
+  "T25121627": {
+    "samples": [
+      {
+        "lot_id": "T25121627-012",
+        "wafer_id": "MSS_ES_Kangyi_CB5-QSO-013-Ash",
+        "prepare": "ALD(W2-35cyc) + topview + Pi-bond(60/30)",
+        "route": "ALD+DB定位+normal",
+        "loctestkey": "XCH"
+      },
+      {
+        "lot_id": "T25121627-011",
+        "wafer_id": "MSS_ES_Kangyi_CB5-QSO-012-Ash",
+        "prepare": "ALD(W2-35cyc) + topview + Pi-bond(60/30)",
+        "route": "ALD+DB定位+normal",
+        "loctestkey": "XCH"
+      },
+      {
+        "lot_id": "T25121627-010",
+        "wafer_id": "MSS_ES_Kangyi_CB5-QSO-011-Ash",
+        "prepare": "ALD(W2-35cyc) + topview + Pi-bond(60/30)",
+        "route": "ALD+DB定位+normal",
+        "loctestkey": "XCH"
+      },
+      {
+        "lot_id": "T25121627-009",
+        "wafer_id": "MSS_ES_Kangyi_CB5-QSO-010-Ash",
+        "prepare": "ALD(W2-35cyc) + topview + Pi-bond(60/30)",
+        "route": "ALD+DB定位+normal",
+        "loctestkey": "XCH"
+      },
+      {
+        "lot_id": "T25121627-008",
+        "wafer_id": "MSS_ES_Kangyi_CAFF-021e",
+        "prepare": "ALD(W2-35cyc) + topview + Pi-bond(60/30)",
+        "route": "ALD+DB定位+normal",
+        "loctestkey": "NHL X-cut"
+      },
+      {
+        "lot_id": "T25121627-007",
+        "wafer_id": "MSS_ES_Kangyi_CAFF-021c",
+        "prepare": "ALD(W2-35cyc) + topview + Pi-bond(60/30)",
+        "route": "ALD+DB定位+normal",
+        "loctestkey": "NHL X-cut"
+      },
+      {
+        "lot_id": "T25121627-006",
+        "wafer_id": "MSS_ES_Kangyi_CAFF-021a",
+        "prepare": "ALD(W2-35cyc) + topview + Pi-bond(60/30)",
+        "route": "ALD+DB定位+normal",
+        "loctestkey": "NHL X-cut"
+      },
+      {
+        "lot_id": "T25121627-005",
+        "wafer_id": "MSS_ES_Kangyi_CAFF-021",
+        "prepare": "ALD(W2-35cyc) + topview + Pi-bond(60/30)",
+        "route": "ALD+DB定位+normal",
+        "loctestkey": "NHL X-cut"
+      },
+      {
+        "lot_id": "T25121627-004",
+        "wafer_id": "MSS_ES_Kangyi_CB5-QSO-013",
+        "prepare": "ALD(W2-35cyc) + topview + Pi-bond(60/30)",
+        "route": "ALD+DB定位+normal",
+        "loctestkey": "XCH"
+      },
+      {
+        "lot_id": "T25121627-003",
+        "wafer_id": "MSS_ES_Kangyi_CB5-QSO-012",
+        "prepare": "ALD(W2-35cyc) + topview + Pi-bond(60/30)",
+        "route": "ALD+DB定位+normal",
+        "loctestkey": "XCH"
+      },
+      {
+        "lot_id": "T25121627-002",
+        "wafer_id": "MSS_ES_Kangyi_CB5-QSO-011",
+        "prepare": "ALD(W2-35cyc) + topview + Pi-bond(60/30)",
+        "route": "ALD+DB定位+normal",
+        "loctestkey": "XCH"
+      },
+      {
+        "lot_id": "T25121627-001",
+        "wafer_id": "MSS_ES_Kangyi_CB5-QSO-010",
+        "prepare": "ALD(W2-35cyc) + topview + Pi-bond(60/30)",
+        "route": "ALD+DB定位+normal",
+        "loctestkey": "XCH"
+      }
+    ]
+  },
+  "T25120209": {
+    "samples": [
+      {
+        "lot_id": "T25120209-010",
+        "wafer_id": "MSS_ES_Kangyi_CB4-QSO-012",
+        "prepare": "ALD(W2-35cyc) + 定位 + Pi-bond(60/30)",
+        "route": "ALD+DB定位+normal",
+        "loctestkey": "CB XCH"
+      },
+      {
+        "lot_id": "T25120209-009",
+        "wafer_id": "MSS_ES_Kangyi_CB4-QSO-011",
+        "prepare": "ALD(W2-35cyc) + 定位 + Pi-bond(60/30)",
+        "route": "ALD+DB定位+normal",
+        "loctestkey": "CB XCH"
+      },
+      {
+        "lot_id": "T25120209-008",
+        "wafer_id": "MSS_ES_Kangyi_CB4-QSO-010",
+        "prepare": "ALD(W2-35cyc) + 定位 + Pi-bond(60/30)",
+        "route": "ALD+DB定位+normal",
+        "loctestkey": "CB XCH"
+      },
+      {
+        "lot_id": "T25120209-007",
+        "wafer_id": "MSS_ES_Kangyi_CB2-056a",
+        "prepare": "ALD(W2-35cyc) + 定位 + Pi-bond(60/30)",
+        "route": "ALD+DB定位+normal",
+        "loctestkey": "CB XCH"
+      },
+      {
+        "lot_id": "T25120209-006",
+        "wafer_id": "MSS_ES_Kangyi_CB2-056",
+        "prepare": "ALD(W2-35cyc) + 定位 + Pi-bond(60/30)",
+        "route": "ALD+DB定位+normal",
+        "loctestkey": "CB XCH"
+      },
+      {
+        "lot_id": "T25120209-005",
+        "wafer_id": "MSS_ES_Kangyi_CAFF-021e",
+        "prepare": "",
+        "route": "ALD+topview+normal",
+        "loctestkey": "Pending"
+      },
+      {
+        "lot_id": "T25120209-004",
+        "wafer_id": "MSS_ES_Kangyi_CAFF-021c",
+        "prepare": "",
+        "route": "ALD+topview+normal",
+        "loctestkey": "Pending"
+      },
+      {
+        "lot_id": "T25120209-003",
+        "wafer_id": "MSS_ES_Kangyi_CAFF-021a",
+        "prepare": "",
+        "route": "ALD+topview+normal",
+        "loctestkey": "Pending"
+      },
+      {
+        "lot_id": "T25120209-002",
+        "wafer_id": "MSS_ES_Kangyi_CAFF-021",
+        "prepare": "",
+        "route": "ALD+topview+normal",
+        "loctestkey": "Pending"
+      },
+      {
+        "lot_id": "T25120209-001",
+        "wafer_id": "MSS_ES_Kangyi_CA11-ini",
+        "prepare": "ALD(W2-35cyc) + topview + Pi-bond(60/30)",
+        "route": "ALD+topview+normal",
+        "loctestkey": "CA NHL X-cut"
+      }
+    ]
+  },
+  "T25111166": {
+    "samples": [
+      {
+        "lot_id": "T25111166-004",
+        "wafer_id": "MSS_ES_Kangyi_CB3v15-A10",
+        "prepare": "",
+        "route": "ALD+DB定位",
+        "loctestkey": ""
+      },
+      {
+        "lot_id": "T25111166-003",
+        "wafer_id": "MSS_ES_Kangyi_CB3v15-A09-2",
+        "prepare": "",
+        "route": "ALD+DB定位",
+        "loctestkey": ""
+      },
+      {
+        "lot_id": "T25111166-002",
+        "wafer_id": "MSS_ES_Kangyi_CB2-053d",
+        "prepare": "ALD(W2 35cycle) + 定位 + Pi bond 60/30",
+        "route": "ALD+DB定位",
+        "loctestkey": "XCH"
+      },
+      {
+        "lot_id": "T25111166-001",
+        "wafer_id": "MSS_ES_Kangyi_CB2-053c",
+        "prepare": "ALD(W2 35cycle) + 定位 + Pi bond 60/30",
+        "route": "ALD+DB定位",
+        "loctestkey": "XCH"
+      }
+    ]
+  },
+  "T25103137": {
+    "samples": [
+      {
+        "lot_id": "T25103137-004",
+        "wafer_id": "MSS_ES_Kangyi_CB2-053b",
+        "prepare": "ALD(W2 35cycle) + 定位 + Pi bond 60/30",
+        "route": "ALD+DB定位",
+        "loctestkey": "XCH"
+      },
+      {
+        "lot_id": "T25103137-003",
+        "wafer_id": "MSS_ES_Kangyi_CB2-053a",
+        "prepare": "ALD(W2 35cycle) + 定位 + Pi bond 60/30",
+        "route": "ALD+DB定位",
+        "loctestkey": "XCH"
+      },
+      {
+        "lot_id": "T25103137-002",
+        "wafer_id": "MSS_ES_Kangyi_CB3_QSO-10Re",
+        "prepare": "ALD(W2 35cycle) + 定位 + Pi bond 60/30",
+        "route": "ALD+DB定位",
+        "loctestkey": "XCH"
+      },
+      {
+        "lot_id": "T25103137-001",
+        "wafer_id": "MSS_ES_Kangyi_CBv15(2.0)",
+        "prepare": "ALD(W2 35cycle) + 定位 + Pi bond 60/30",
+        "route": "ALD+DB定位",
+        "loctestkey": "XCH"
+      }
+    ]
+  },
+  "T25102097": {
+    "samples": [
+      {
+        "lot_id": "T25102097-011",
+        "wafer_id": "MSS_ES_Kangyi_CAFF-019",
+        "prepare": "ALD(W2-35cyc) + 定位 + M-bond(60/30) + Probing",
+        "route": "ALD+定位+probing",
+        "loctestkey": "DUT3"
+      },
+      {
+        "lot_id": "T25102097-010",
+        "wafer_id": "MSS_ES_Kangyi_CAFF-017a",
+        "prepare": "ALD(W2-35cyc) + 定位 + M-bond(60/30) + Probing",
+        "route": "ALD+定位+probing",
+        "loctestkey": "DUT3"
+      },
+      {
+        "lot_id": "T25102097-009",
+        "wafer_id": "MSS_ES_Kangyi_CB2-055",
+        "prepare": "ALD(W2 35cycle) + Pi bond(60/30)",
+        "route": "ALD+normal",
+        "loctestkey": "XCH"
+      },
+      {
+        "lot_id": "T25102097-008",
+        "wafer_id": "MSS_ES_Kangyi_CB2-054",
+        "prepare": "ALD(W2 35cycle) + Pi bond(60/30)",
+        "route": "ALD+Probing",
+        "loctestkey": "XCH"
+      },
+      {
+        "lot_id": "T25102097-007",
+        "wafer_id": "MSS_ES_Kangyi_CB2-053",
+        "prepare": "ALD(W2 35cycle) + Pi bond(60/30)",
+        "route": "ALD+normal",
+        "loctestkey": "XCH"
+      },
+      {
+        "lot_id": "T25102097-006",
+        "wafer_id": "MSS_ES_Kangyi_CAFF-019",
+        "prepare": "ALD(W2-35cyc) + 定位 + M-bond(60/30) + Probing",
+        "route": "ALD+定位+probing",
+        "loctestkey": "DUT3"
+      },
+      {
+        "lot_id": "T25102097-005",
+        "wafer_id": "MSS_ES_Kangyi_CAFF-019",
+        "prepare": "ALD(W2-35cyc) + 定位 + M-bond(60/30) + Probing",
+        "route": "ALD+定位+probing",
+        "loctestkey": "DUT1"
+      },
+      {
+        "lot_id": "T25102097-004",
+        "wafer_id": "MSS_ES_Kangyi_CAFF-018b",
+        "prepare": "ALD(W2-35cyc) + 定位 + M-bond(60/30) + Probing",
+        "route": "ALD+定位+probing",
+        "loctestkey": "DUT3"
+      },
+      {
+        "lot_id": "T25102097-003",
+        "wafer_id": "MSS_ES_Kangyi_CAFF-018b",
+        "prepare": "ALD(W2-35cyc) + 定位 + M-bond(60/30) + Probing",
+        "route": "ALD+定位+probing",
+        "loctestkey": "DUT1"
+      },
+      {
+        "lot_id": "T25102097-002",
+        "wafer_id": "MSS_ES_Kangyi_CAFF-017a",
+        "prepare": "ALD(W2-35cyc) + 定位 + M-bond(60/30) + Probing",
+        "route": "ALD+定位+probing",
+        "loctestkey": "DUT3"
+      },
+      {
+        "lot_id": "T25102097-001",
+        "wafer_id": "MSS_ES_Kangyi_CAFF-017a",
+        "prepare": "ALD(W2-35cyc) + 定位 + M-bond(60/30) + Probing",
+        "route": "ALD+定位+probing",
+        "loctestkey": "DUT1"
+      }
+    ]
+  },
+  "T251020101": {
+    "samples": [
+      {
+        "lot_id": "T251020101-006",
+        "wafer_id": "MSS_ES_Kangyi_2535sksk001.003",
+        "prepare": "ALD(W2 35cycle) +topview + Pi bond(60/30)",
+        "route": "ALD+TOP view+ TEM",
+        "loctestkey": "Spark Ycut 40P"
+      },
+      {
+        "lot_id": "T251020101-005",
+        "wafer_id": "MSS_ES_Kangyi_CB3_QSO-16",
+        "prepare": "ALD(W2 35cycle) + Pi bond(60/30)",
+        "route": "ALD+normal",
+        "loctestkey": "XCH"
+      },
+      {
+        "lot_id": "T251020101-004",
+        "wafer_id": "MSS_ES_Kangyi_CB3_QSO-13",
+        "prepare": "ALD(W2 35cycle) + Pi bond(60/30)",
+        "route": "ALD+normal",
+        "loctestkey": "XCH"
+      },
+      {
+        "lot_id": "T251020101-003",
+        "wafer_id": "MSS_ES_Kangyi_CB3_QSO-12",
+        "prepare": "ALD(W2 35cycle) + Pi bond(60/30)",
+        "route": "ALD+normal",
+        "loctestkey": "XCH"
+      },
+      {
+        "lot_id": "T251020101-002",
+        "wafer_id": "MSS_ES_Kangyi_CB3_QSO-11",
+        "prepare": "ALD(W2 35cycle) + Pi bond(60/30)",
+        "route": "ALD+normal",
+        "loctestkey": "XCH"
+      },
+      {
+        "lot_id": "T251020101-001",
+        "wafer_id": "MSS_ES_Kangyi_CB3_QSO-10",
+        "prepare": "ALD(W2 35cycle) + Pi bond(60/30)",
+        "route": "ALD+normal",
+        "loctestkey": "XCH"
+      }
+    ]
+  },
+  "T25101538": {
+    "samples": [
+      {
+        "lot_id": "T25101538-001",
+        "wafer_id": "Samples: 1",
+        "prepare": "ALD(W2-35cyc) + M bond60/30 + EDS",
+        "route": "ALD+normal+EDS",
+        "loctestkey": "M1 SEM Bar area"
+      }
+    ]
+  },
+  "T25101102": {
+    "samples": [
+      {
+        "lot_id": "T25101102-002",
+        "wafer_id": "MSS_ES_Kangyi_TT2-012a",
+        "prepare": "ALD(W2-35cyc) + M-bond(60/30) + FIB + TEM",
+        "route": "ALD+Probing",
+        "loctestkey": "T2T 36P Gap20nm X-cut"
+      },
+      {
+        "lot_id": "T25101102-001",
+        "wafer_id": "MSS_ES_Kangyi_CB-OXS-116",
+        "prepare": "ALD(W2 35cycle) +定位+ Pi bond(60/30)",
+        "route": "ALD+DB定位",
+        "loctestkey": "XCH"
+      }
+    ]
+  },
+  "T25092556": {
+    "samples": [
+      {
+        "lot_id": "T25092556-001",
+        "wafer_id": "MSS_ES_Kangyi_CA_FF_CAv05",
+        "prepare": "ALD(W2-35cyc) + topview + Pi-bond(60/30)",
+        "route": "ALD+TOP view+ TEM",
+        "loctestkey": "OCD X-Cut"
+      }
+    ]
+  },
+  "T25092231": {
+    "samples": [
+      {
+        "lot_id": "T25092231-017",
+        "wafer_id": "MSS_ES_Kangyi_CA_FF_CAv5_Re",
+        "prepare": "ALD(W2-35cyc) + 定位 + M-bond(60/30) + Probing",
+        "route": "ALD+probing+EDS",
+        "loctestkey": "DUT3"
+      },
+      {
+        "lot_id": "T25092231-016",
+        "wafer_id": "MSS_ES_Kangyi_CA_FF_ini",
+        "prepare": "ALD(W2-35cyc) + 定位 + M-bond(60/30) + Probing",
+        "route": "ALD+Probing",
+        "loctestkey": "DUT3"
+      },
+      {
+        "lot_id": "T25092231-015",
+        "wafer_id": "MSS_ES_Kangyi_CA_FF_CAv5_Re",
+        "prepare": "ALD(W2-35cyc) + 定位 + M-bond(60/30) + Probing",
+        "route": "ALD+Probing",
+        "loctestkey": "Dut1"
+      },
+      {
+        "lot_id": "T25092231-014",
+        "wafer_id": "MSS_ES_Kangyi_CA_FF_CAv2_Re",
+        "prepare": "ALD(W2-35cyc) + 定位 + M-bond(60/30) + Probing",
+        "route": "ALD+Probing",
+        "loctestkey": "Dut3"
+      },
+      {
+        "lot_id": "T25092231-013",
+        "wafer_id": "MSS_ES_Kangyi_CA_FF_ini",
+        "prepare": "ALD(W2-35cyc) + 定位 + M-bond(60/30) + Probing",
+        "route": "ALD+Probing",
+        "loctestkey": "DUT1"
+      },
+      {
+        "lot_id": "T25092231-012",
+        "wafer_id": "MSS_ES_Kangyi_CA_FF_CAv05",
+        "prepare": "ALD(W2-35cyc) + 定位 + Pi-bond(60/30)",
+        "route": "ALD+DB定位",
+        "loctestkey": "DUT2"
+      },
+      {
+        "lot_id": "T25092231-011",
+        "wafer_id": "MSS_ES_Kangyi_CA_FF_CAv02",
+        "prepare": "ALD(W2-35cyc) + 定位 + Pi-bond(60/30)",
+        "route": "ALD+DB定位",
+        "loctestkey": "DUT1"
+      },
+      {
+        "lot_id": "T25092231-010",
+        "wafer_id": "MSS_ES_Kangyi_CA_FF_CAv05",
+        "prepare": "ALD(W2-35cyc) + Pi-bond(60/30)",
+        "route": "ALD+normal",
+        "loctestkey": "OCD Y-cut"
+      },
+      {
+        "lot_id": "T25092231-009",
+        "wafer_id": "MSS_ES_Kangyi_CA_FF_CAv05",
+        "prepare": "ALD(W2-35cyc) + topview + Pi-bond(60/30)",
+        "route": "ALD+TOP view+ TEM",
+        "loctestkey": "NHL Y-Cut"
+      },
+      {
+        "lot_id": "T25092231-008",
+        "wafer_id": "MSS_ES_Kangyi_CA_FF_CAv05",
+        "prepare": "ALD(W2-35cyc) + topview + Pi-bond(60/30)",
+        "route": "ALD+TOP view+ TEM",
+        "loctestkey": "NHL X-Cut"
+      },
+      {
+        "lot_id": "T25092231-007",
+        "wafer_id": "MSS_ES_Kangyi_CA_FF_CAv05",
+        "prepare": "ALD(W2-35cyc) + 定位 + Pi-bond(60/30)",
+        "route": "ALD+DB定位",
+        "loctestkey": "DUT3"
+      },
+      {
+        "lot_id": "T25092231-006",
+        "wafer_id": "MSS_ES_Kangyi_CA_FF_CAv05",
+        "prepare": "ALD(W2-35cyc) + 定位 + Pi-bond(60/30)",
+        "route": "ALD+DB定位",
+        "loctestkey": "DUT2"
+      },
+      {
+        "lot_id": "T25092231-005",
+        "wafer_id": "MSS_ES_Kangyi_CA_FF_CAv05",
+        "prepare": "ALD(W2-35cyc) + 定位 + Pi-bond(60/30)",
+        "route": "ALD+DB定位",
+        "loctestkey": "DUT1"
+      },
+      {
+        "lot_id": "T25092231-004",
+        "wafer_id": "MSS_ES_Kangyi_CA_FF_CAv02",
+        "prepare": "ALD(W2-35cyc) + 定位 + Pi-bond(60/30)",
+        "route": "ALD+DB定位",
+        "loctestkey": "DUT3"
+      },
+      {
+        "lot_id": "T25092231-003",
+        "wafer_id": "MSS_ES_Kangyi_CA_FF_CAv02",
+        "prepare": "ALD(W2-35cyc) + 定位 + Pi-bond(60/30)",
+        "route": "ALD+DB定位",
+        "loctestkey": "DUT1"
+      },
+      {
+        "lot_id": "T25092231-002",
+        "wafer_id": "MSS_ES_Kangyi_CA_FF_ini",
+        "prepare": "ALD(W2-35cyc) + 定位 + Pi-bond(60/30)",
+        "route": "ALD+DB定位",
+        "loctestkey": "DUT3"
+      },
+      {
+        "lot_id": "T25092231-001",
+        "wafer_id": "MSS_ES_Kangyi_CA_FF_ini",
+        "prepare": "ALD(W2-35cyc) + 定位 + Pi-bond(60/30)",
+        "route": "ALD+DB定位",
+        "loctestkey": "DUT1"
+      }
+    ]
+  },
+  "T25092229": {
+    "samples": [
+      {
+        "lot_id": "T25092229-008",
+        "wafer_id": "MSS_ES_Kangyi_CA_FF_CAv05b",
+        "prepare": "ALD(W2-35cyc) + 定位 + Pi-bond(60/30)",
+        "route": "ALD+DB定位",
+        "loctestkey": "DUT3"
+      },
+      {
+        "lot_id": "T25092229-007",
+        "wafer_id": "MSS_ES_Kangyi_CA_FF_CAv05b",
+        "prepare": "ALD(W2-35cyc) + 定位 + Pi-bond(60/30)",
+        "route": "ALD+DB定位",
+        "loctestkey": "DUT1"
+      },
+      {
+        "lot_id": "T25092229-006",
+        "wafer_id": "MSS_ES_Kangyi_CA_FF_CAv05a",
+        "prepare": "ALD(W2-35cyc) + 定位 + Pi-bond(60/30)",
+        "route": "ALD+DB定位",
+        "loctestkey": "DUT3"
+      },
+      {
+        "lot_id": "T25092229-005",
+        "wafer_id": "MSS_ES_Kangyi_CA_FF_CAv05a",
+        "prepare": "ALD(W2-35cyc) + 定位 + Pi-bond(60/30)",
+        "route": "ALD+DB定位",
+        "loctestkey": "DUT1"
+      },
+      {
+        "lot_id": "T25092229-004",
+        "wafer_id": "MSS_ES_Kangyi_CA7_CAv5",
+        "prepare": "ALD(W2-35cyc) + topview + Pi-bond(60/30)",
+        "route": "ALD+TOP view+ TEM",
+        "loctestkey": "NHL Y-Cut"
+      },
+      {
+        "lot_id": "T25092229-003",
+        "wafer_id": "MSS_ES_Kangyi_CA7_CAv5",
+        "prepare": "ALD(W2-35cyc) + topview + Pi-bond(60/30)",
+        "route": "ALD+TOP view+ TEM",
+        "loctestkey": "NHL X-Cut"
+      },
+      {
+        "lot_id": "T25092229-002",
+        "wafer_id": "MSS_ES_Kangyi_CA7_CAv5",
+        "prepare": "ALD(W2-35cyc) + 定位 + Pi-bond(60/30)",
+        "route": "ALD+DB定位",
+        "loctestkey": "DUT3"
+      },
+      {
+        "lot_id": "T25092229-001",
+        "wafer_id": "MSS_ES_Kangyi_CA7_CAv5",
+        "prepare": "ALD(W2-35cyc) + 定位 + Pi-bond(60/30)",
+        "route": "ALD+DB定位",
+        "loctestkey": "DUT1"
+      }
+    ]
+  },
+  "T25090836": {
+    "samples": [
+      {
+        "lot_id": "T25090836-003",
+        "wafer_id": "MSS_ES_Kangyi_TGE_CBv6_(5.1)",
+        "prepare": "ALD(W2 35cyc) + 定位 + Pi bond(60/30)",
+        "route": "ALD+DB定位",
+        "loctestkey": "Macro1"
+      },
+      {
+        "lot_id": "T25090836-002",
+        "wafer_id": "MSS_ES_Kangyi_TGE_CBv6_(2.1)",
+        "prepare": "ALD(W2 35cycle) + Pi bond(60/30)",
+        "route": "ALD+normal",
+        "loctestkey": "XCH"
+      },
+      {
+        "lot_id": "T25090836-001",
+        "wafer_id": "MSS_ES_Kangyi_TGE_CBv6_(2.1)",
+        "prepare": "ALD(W2 35cyc) + 定位 + Pi bond(60/30)",
+        "route": "ALD+DB定位",
+        "loctestkey": "Macro1"
+      }
+    ]
+  },
+  "T25090109": {
+    "samples": [
+      {
+        "lot_id": "T25090109-002",
+        "wafer_id": "MSS_ES_Kangyi_CP-P-01",
+        "prepare": "ALD(W2-35cyc) + M-bond(60/30) + FIB + TEM",
+        "route": "ALD+Probing",
+        "loctestkey": "Gap20-T2T-Xcut"
+      },
+      {
+        "lot_id": "T25090109-001",
+        "wafer_id": "MSS_ES_Kangyi_CP-P-ini",
+        "prepare": "ALD(W2-35cyc) + M-bond(60/30) + FIB + TEM",
+        "route": "ALD+Probing",
+        "loctestkey": "Gap20-T2T-Xcut"
+      }
+    ]
+  },
+  "T25082545": {
+    "samples": [
+      {
+        "lot_id": "T25082545-004",
+        "wafer_id": "MSS_ES_Kangyi_CB2-032c",
+        "prepare": "ALD(W2 35cycle) + Pi bond 60/30",
+        "route": "ALD+normal",
+        "loctestkey": "XCH"
+      },
+      {
+        "lot_id": "T25082545-003",
+        "wafer_id": "MSS_ES_Kangyi_CB2-032b",
+        "prepare": "ALD(W2 35cycle) + Pi bond 60/30",
+        "route": "ALD+normal",
+        "loctestkey": "XCH"
+      },
+      {
+        "lot_id": "T25082545-002",
+        "wafer_id": "MSS_ES_Kangyi_CB2-032a",
+        "prepare": "ALD(W2 35cycle) + Pi bond 60/30",
+        "route": "ALD+normal",
+        "loctestkey": "XCH"
+      },
+      {
+        "lot_id": "T25082545-001",
+        "wafer_id": "MSS_ES_Kangyi_CB2-032",
+        "prepare": "ALD(W2 35cycle) + Pi bond 60/30",
+        "route": "ALD+normal",
+        "loctestkey": "XCH"
+      }
+    ]
+  },
+  "T250723109": {
+    "samples": [
+      {
+        "lot_id": "T250723109-005",
+        "wafer_id": "MSS_ES_Kangyi_CBv6R(-2.2)",
+        "prepare": "ALD(W2 35cycle) + 定位 + Pi bond 60/30",
+        "route": "ALD+DB定位",
+        "loctestkey": "Macro1"
+      },
+      {
+        "lot_id": "T250723109-004",
+        "wafer_id": "MSS_ES_Kangyi_CB-OSX-110",
+        "prepare": "ALD(W2 35cycle) + Pi bond 60/30",
+        "route": "ALD+normal",
+        "loctestkey": "XCH"
+      },
+      {
+        "lot_id": "T250723109-003",
+        "wafer_id": "MSS_ES_Kangyi_CBx35-112(-2.-2)",
+        "prepare": "ALD(W2 35cycle) + Pi bond 60/30",
+        "route": "ALD+normal",
+        "loctestkey": "XCH"
+      },
+      {
+        "lot_id": "T250723109-002",
+        "wafer_id": "MSS_ES_Kangyi_CBx35-111(2.-2)",
+        "prepare": "ALD(W2 35cycle) + Pi bond 60/30",
+        "route": "ALD+normal",
+        "loctestkey": "XCH"
+      },
+      {
+        "lot_id": "T250723109-001",
+        "wafer_id": "MSS_ES_Kangyi_CBv6R(-2.2)",
+        "prepare": "ALD(W2 35cycle) + 定位 + Pi bond 60/30",
+        "route": "ALD+DB定位",
+        "loctestkey": "Macro1"
+      }
+    ]
+  }
+}
