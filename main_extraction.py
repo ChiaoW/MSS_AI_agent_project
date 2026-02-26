@@ -192,7 +192,7 @@ def process_lot_request(lot_directory: str, lot_id_override: str = None):
         format_instructions=format_instructions
     )
     
-    with open(f"three_cases_debug_prompt/DEBUG_FINAL_PROMPT_{debug_lot_id}.txt", "w", encoding="utf-8") as f:
+    with open(f"data/output/three_cases_debug_prompt/DEBUG_FINAL_PROMPT_{debug_lot_id}.txt", "w", encoding="utf-8") as f:
         f.write(debug_prompt_str)
         
     print(f"[Debug] Final prompt saved to DEBUG_FINAL_PROMPT.txt. Please check it!")
@@ -287,9 +287,9 @@ def process_lot_request(lot_directory: str, lot_id_override: str = None):
 if __name__ == "__main__":
     # Batch test: run three cases and save outputs to a timestamped file
     cases = [
-        "all_cases/T25100101",
-        "Kang_Yi_Lin_Merged/T25082545",
-        "Kang_Yi_Lin_Merged/T251020101",
+        "data/raw/all_cases/T25100101",
+        "data/raw/Kang_Yi_Lin_Merged/T25082545",
+        "data/raw/Kang_Yi_Lin_Merged/T251020101",
     ]
 
     results = []
@@ -384,7 +384,7 @@ if __name__ == "__main__":
 
     # Save aggregated results to a timestamped file
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-    out_fname = f"three_cases_predict_results/esults_{ts}.txt"
+    out_fname = f"data/output/three_cases_predict_results/results_{ts}.txt"
     with open(out_fname, "w", encoding="utf-8") as outf:
         for case_dir, content in results:
             outf.write(f"=== CASE: {case_dir} ===\n")

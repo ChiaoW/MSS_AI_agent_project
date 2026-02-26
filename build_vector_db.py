@@ -18,8 +18,8 @@ from langchain_openai import OpenAIEmbeddings
 from file_processor import UniversalFileProcessor
 
 # 設定路徑
-GT_JSON_PATH = "ground_truth/ground_truth_with_wafer_id_processed.json"
-CASES_DIR = "./all_cases_in_ground_truth"
+GT_JSON_PATH = "data/reference/ground_truth/ground_truth_with_wafer_id_processed.json"
+CASES_DIR = "data/raw/all_cases_in_ground_truth"
 DB_PATH = "./qdrant_db"
 COLLECTION_NAME = "semiconductor_orders"
 

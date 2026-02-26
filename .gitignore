@@ -8,6 +8,8 @@ data/raw/
 data/output/
 qdrant_db/
 
+unsloth_compiled_cache/
+outputs/
 # C extensions
 *.so
 

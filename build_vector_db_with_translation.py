@@ -19,11 +19,11 @@ from file_processor import UniversalFileProcessor
 # ==========================================
 # Config
 # ==========================================
-GT_JSON_PATH = "ground_truth/Kang_Yi_Lin_case_ground_truth_translated.json"
-CASES_DIR = "./Kang_Yi_Lin_Merged"
+GT_JSON_PATH = "data/reference/ground_truth/Kang_Yi_Lin_case_ground_truth_translated.json"
+CASES_DIR = "data/raw/Kang_Yi_Lin_Merged"
 DB_PATH = "./qdrant_db"
 COLLECTION_NAME = "semiconductor_orders_english"
-CACHE_FILE = "translation_cache.json"  # 用來存翻譯過的文字，避免重複跑
+CACHE_FILE = "data/output/translation_cache.json"  # 用來存翻譯過的文字，避免重複跑
 
 # LLM 設定 (用於改寫/翻譯)
 LLM_API_BASE = "http://localhost:8000/v1"

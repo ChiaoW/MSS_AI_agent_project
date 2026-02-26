@@ -5,12 +5,10 @@ import pandas as pd
 import difflib
 from enum import Enum
 
-df = pd.read_csv("route.csv") 
+df = pd.read_csv("data/reference/route.csv") 
 active_routes = df[df['stopuse'].isnull()]['route'].unique().tolist()
 
 try:
-    df = pd.read_csv("route.csv")
-    # 確保 description 欄位存在，若無則填空字串
     if 'description' not in df.columns:
         df['description'] = ""
     
@@ -115,7 +113,10 @@ class SampleInfo(BaseModel):
             "Refers to the specific sequence and combination of manufacturing processes that a sample must undergo."
             "CRITICAL: You MUST output exactly one of the valid route names from the Route Knowledge Base below:\n"
             f"\n{route_descriptions_text}"
-        )
+        ),
+        json_schema_extra={
+            "enum": active_routes
+        }
     )
 
     @field_validator('route', mode='before')

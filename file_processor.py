@@ -61,7 +61,7 @@ class UniversalFileProcessor:
             elif ext == '.pdf':
                 content =self._read_pdf_with_olmocr(file_path)
             elif ext in ['.png', '.jpg', '.jpeg', '.bmp', '.tiff']:
-                content =self._read_image(file_path)
+                content =self._process_image_with_olmocr(file_path)
             elif ext == '.msg':
                 content =self._read_msg(file_path)
             elif ext == '.zip':
