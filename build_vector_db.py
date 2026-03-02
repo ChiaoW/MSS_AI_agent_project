@@ -12,6 +12,7 @@ from langchain_huggingface import HuggingFaceEmbeddings
 # 選擇 Embedding 模型
 # 選項 A: 使用本地 FastEmbed (推薦，無需依賴 vLLM server 的 embedding endpoint)
 from langchain_community.embeddings.fastembed import FastEmbedEmbeddings
+from langchain_qdrant import FastEmbedSparse
 # 選項 B: 使用 vLLM 的 OpenAI 兼容接口 (若 vLLM 啟動參數包含 --embedding)
 from langchain_openai import OpenAIEmbeddings
 
@@ -76,9 +77,11 @@ def build_database():
     print(f"Step 3: Ingesting {len(documents)} documents into Qdrant...")
 
     embeddings = FastEmbedEmbeddings(model_name="nomic-ai/nomic-embed-text-v1.5")
+    sparse_embeddings = FastEmbedSparse(model_name="Qdrant/bm25")
     QdrantVectorStore.from_documents(
             documents,
             embeddings,
+            sparse_embedding=sparse_embeddings,
             path=DB_PATH,
             collection_name=COLLECTION_NAME,
             force_recreate=True

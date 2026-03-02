@@ -51,24 +51,24 @@ def get_route_tokens(text: str) -> set:
     return tokens - stop_words
 
 class SampleInfo(BaseModel):
-    # thought_process: str = Field(
-    #     description=(
-    #         "Step-by-step reasoning for this specific sample line."
-    #         "\n1. Identify the 'Wafer ID' from the text."
-    #         "\n2. Analyze the 'Route' vs 'Prepare' logic: "
-    #         "Does the text mention pre-treatment (e.g., positioning, marking)? If yes, put in 'prepare'. "
-    #         "Does it mention the main flow? If yes, match it to the RouteEnum."
-    #         "\n3. Enum Matching: Look at the available RouteEnum options and write down exactly which one matches best BEFORE filling the route field."
-    #     )
-    # )
-    raw_evidence: str = Field(
+    thought_process: str = Field(
         description=(
-            "The EXACT text segment or table row from the input email that describes this specific sample. "
-            "You MUST copy it directly from the 'CURRENT TARGET CASE' content. "
-            "Do NOT summarize, just copy. This proves you are looking at the correct input."
-            "Keep it BRIEF (Max 30 words). Identify the specific line mentioning the Wafer ID."
+            "Step-by-step reasoning for this specific sample line."
+            "\n1. Identify the 'Wafer ID' from the text."
+            "\n2. Analyze the 'Route' vs 'Prepare' logic: "
+            "Does the text mention pre-treatment (e.g., positioning, marking)? If yes, put in 'prepare'. "
+            "Does it mention the main flow? If yes, match it to the RouteEnum."
+            "\n3. Enum Matching: Look at the available RouteEnum options and write down exactly which one matches best BEFORE filling the route field."
         )
     )
+    # raw_evidence: str = Field(
+    #     description=(
+    #         "The EXACT text segment or table row from the input email that describes this specific sample. "
+    #         "You MUST copy it directly from the 'CURRENT TARGET CASE' content. "
+    #         "Do NOT summarize, just copy. This proves you are looking at the correct input."
+    #         "Keep it BRIEF (Max 30 words). Identify the specific line mentioning the Wafer ID."
+    #     )
+    # )
 
     lot_id: Optional[str] = Field(
         default=None, 
@@ -82,7 +82,6 @@ class SampleInfo(BaseModel):
             "Exclude vague terms like 'wafer' or 'die'."
             "The wafer ID or chip ID represents the code or name of the sample or die to be tested. "
             "There may be multiple wafer IDs in a single email for this specific sample entry, and there's no fixed format. "
-            "If the name isn't explicitly specified, it might be included with the route or prepare method. "
             "Possible names include: 2538ESNE013.000, OPL17-003, MSS_ES_Kangyi_TT2-SN-014, ALD+1:1:10 test-2, OD-6-S1-Base, etc."
             "\n[Contextual Disambiguation]: "
             "Look for patterns typical of Lot IDs, serial numbers, or experimental labels (often alphanumeric sequences with dashes or dots)."
@@ -119,28 +118,28 @@ class SampleInfo(BaseModel):
         }
     )
 
-    @field_validator('route', mode='before')
-    @classmethod
-    def fuzzy_match_route(cls, v):
-        if not v:
-            return v
+    # @field_validator('route', mode='before')
+    # @classmethod
+    # def fuzzy_match_route(cls, v):
+    #     if not v:
+    #         return v
         
-        input_str = str(v).strip()
-        valid_options = active_routes
+    #     input_str = str(v).strip()
+    #     valid_options = active_routes
 
-        if input_str in valid_options:
-            return input_str
+    #     if input_str in valid_options:
+    #         return input_str
 
-        for option in valid_options:
-            if input_str.lower() == option.lower():
-                return option
+    #     for option in valid_options:
+    #         if input_str.lower() == option.lower():
+    #             return option
                 
-        # Lower cutoff to 0.6 to be more forgiving, and return the raw string if it fails instead of crashing
-        matches = difflib.get_close_matches(input_str, valid_options, n=1, cutoff=0.6)
-        if matches:
-            return matches[0]
+    #     # Lower cutoff to 0.6 to be more forgiving, and return the raw string if it fails instead of crashing
+    #     matches = difflib.get_close_matches(input_str, valid_options, n=1, cutoff=0.6)
+    #     if matches:
+    #         return matches[0]
 
-        return input_str
+    #     return input_str
     
     prepare: Optional[str] = Field(
         default=None,
@@ -151,15 +150,11 @@ class SampleInfo(BaseModel):
             [MANDATORY MAPPING RULES]:
             1. **Priority 1 (Explicit Text):** Extract exact parameters if present (e.g., 'ALD(W2-A)', 'M-bond(60/30)').
             2. **Priority 2 (History Inference - CRITICAL):** 
-               - If the text uses generic terms like "ALD", "Coating", "epoxy", "Resin", or "Glue", you **MUST NOT** just write the generic word. 
-               - Instead, you MUST look at the 'HISTORICAL REFERENCE CASES' to find the specific recipe used for this customer/macro (e.g., 'ALD(W2 35cycle)', 'Pi bond(60/30)', or 'M-bond(60/30)') and apply it to the current sample.
-            3. **Keywords:** 
-               - "DB-located" -> "+ DB positioning".
-               - "Probing" -> "+ Probing".
-               - "Topview" -> "+ Top view".
+               - **MUST NOT** just write the generic word like: "ALD", "Coating", "epoxy", "Resin", or "Glue"
+               - Instead, you **MUST** look at the 'HISTORICAL REFERENCE CASES' to find the specific recipe used for this customer/macro (e.g., 'ALD(W2 35cycle)', 'Pi bond(60/30)', or 'M-bond(60/30)') and apply it to the current sample.
 
             [Output Format]
-            Combine steps with '+': "Top view+ALD(W2-A)+DB positioning+Pi bond(60/30)+Probing"
+            Combine steps with '+': "Top view+ALD(W2-A)+DB+Pi bond(60/30)+Probing"
         """
     )
     
@@ -170,11 +165,11 @@ class SampleInfo(BaseModel):
             
             "Key Indicators & Patterns to Extract: "
             "1. **Directional Cuts:** explicit mentions of 'X-CUT' (X-direction cross-section) or 'Y-CUT' (Y-direction cross-section). "
-            "   - Examples: '23P Y-CUT', 'Pt 5s-XCUT', 'Macro 3G Y-cut'. "
+            "   - Examples to generate: '23P Y-CUT', 'Pt 5s-XCUT', 'Macro 3G Y-cut'. "
             "2. **Coordinates/Position Codes:** numerical sequences indicating specific die or structure locations. "
-            "   - Examples: '60-20-03', 'R3-C5'. "
+            "   - Examples to generate: '60-20-03', 'R3-C5'. "
             "3. **Feature Targeting:** references to locations identified by inspection tools. "
-            "   - Examples: 'AOI' (target the defect found by AOI), 'Hotspot'. "
+            "   - Examples to generate: 'AOI' (target the defect found by AOI), 'Hotspot'. "
             "4. **Macro Name: ** If a 'Macro', 'Navi Map', or 'Target' column exists (e.g., 'XCH', 'Macro 3G Y-cut', 'Spark Ycut 40P', 'DUT2 X-Cut'), use this EXACT string as the loctestkey. "
 
             "[Constraints]: Do NOT confuse with 'wafer_id'. Remove filenames like .pdf or .pptx."
@@ -214,97 +209,6 @@ class SampleInfo(BaseModel):
 
         return "+".join(unique_steps)
 
-    # ==========================================
-    # Validator 2: 跨欄位連動
-    # ==========================================
-    # @model_validator(mode='after')
-    # def enforce_route_dependencies(self) -> 'SampleInfo':
-    #     """
-    #     邏輯升級版: 
-    #     1. 檢查是否需要 Probing (從 prepare 判斷)。
-    #     2. 根據是否需要 Probing，在 active_routes 中尋找最佳匹配的 Route。
-    #     3. 確保 self.route 最終一定是在 active_routes 清單內的合法字串。
-    #     """
-    #     # 取得目前的數值
-    #     curr_prepare = self.prepare or ""
-    #     curr_route = self.route or "" # 此時已是字串
-
-    #     if curr_route in active_routes:
-    #         # 如果 LLM 選了 ALD+normal，但 prepare 裡有 probing，我們才需要介入
-    #         # 如果 LLM 選了 ALD+Probing，那就信任它，不要因為 prepare 沒寫就改掉
-    #         probing_triggers = ["probing", "easylift", "nano-probing"]
-    #         needs_probing = any(k in curr_prepare.lower() for k in probing_triggers)
-            
-    #         if needs_probing and "probing" not in curr_route.lower():
-    #             # 只有這時候才強制升級
-    #             pass # 繼續往下走去尋找最佳匹配
-    #         else:
-    #             return self # 信任目前的 Route
-        
-    #     # 1. 判斷是否需要 Probing
-    #     probing_triggers = ["probing", "easylift", "nano-probing", "nano probing"]
-    #     has_probing_intent = any(k in curr_prepare.lower() for k in probing_triggers)
-        
-    #     # 2. 準備候選名單 (Candidates)
-    #     if has_probing_intent:
-    #         # 找出所有包含 Probing 的合法 Routes
-    #         candidates = [
-    #             r for r in active_routes 
-    #             if "probing" in r.lower() or "easylift" in r.lower()
-    #         ]
-    #     else:
-    #         candidates = [
-    #             r for r in active_routes 
-    #             if "probing" not in r.lower() and "easylift" not in r.lower()
-    #         ]
-    #         # 如果排除後沒東西了 (極端情況)，再 fallback 回 active_routes
-    #         if not candidates:
-    #             candidates = active_routes
-
-    #     # 3. 智慧比對：找出與目前 curr_route 成分最相似的 Candidate
-    #     curr_tokens = get_route_tokens(curr_route)
-        
-    #     best_match = None
-    #     best_score = -1
-        
-    #     for candidate in candidates:
-    #         # 取得候選人的特徵 tokens
-    #         cand_tokens = get_route_tokens(candidate)
-            
-    #         # 計算交集數量 (Intersection Count)
-    #         score = len(curr_tokens.intersection(cand_tokens))
-            
-    #         # 邏輯：分數越高越好；若分數相同，選長度較短的 (越簡單越好)
-    #         if score > best_score:
-    #             best_score = score
-    #             best_match = candidate
-    #         elif score == best_score:
-    #             if best_match is None or len(candidate) < len(best_match):
-    #                 best_match = candidate
-        
-    #     # 4. 更新 Route
-    #     if best_match:
-    #         self.route = best_match
-    #     else:
-    #         # 若真的完全找不到 (例如 curr_route 是空的，且沒有 tokens)
-    #         # 如果需要 Probing，就預設給一個最簡單的 Probing Route (e.g. "Probing")
-    #         if has_probing_intent and candidates:
-    #             self.route = min(candidates, key=len)
-            
-    #         # 若不需要 Probing 且沒對到，嘗試最後的模糊比對 (Fuzzy Match) 來修 typos
-    #         elif curr_route not in active_routes:
-    #             close_matches = difflib.get_close_matches(curr_route, active_routes, n=1, cutoff=0.6)
-    #             if close_matches:
-    #                 self.route = close_matches[0]
-    #             else:
-    #                 # 真的沒救了，為了防止 Pydantic 報錯，設為預設值
-    #                 # 假設 "normal" 存在於 active_routes，若無則取第一個
-    #                 if "normal" in active_routes:
-    #                     self.route = "normal"
-    #                 elif active_routes:
-    #                      self.route = active_routes[0]
-
-    #     return self
     
     @field_validator('loctestkey')
     @classmethod
@@ -331,12 +235,13 @@ class OrderInfo(BaseModel):
     global_analysis: str = Field(
         description=(
             "Execute a Deep Logic Analysis step before extraction:"
-            "\n1. **List all Samples:** Identify each unique sample or Wafer ID present in the 'CURRENT TARGET CASE'."
-            "\n2. **Map Specific Instructions (CRITICAL):** For EACH sample, explicitly state what the text or PPT requested. "
+            "\n1. **Count Samples:** Explicitly scan the text and tables in the <target_case> and state EXACTLY how many Wafer IDs/Samples are present."
+            "\n2. **List all Samples:** Identify each unique sample or Wafer ID present in the 'CURRENT TARGET CASE'."
+            "\n3. **Map Specific Instructions (CRITICAL):** For EACH sample, explicitly state what the text or PPT requested. "
             "(e.g., 'Sample A requires ALD+DB+Probing because of X-Cut note. Sample B only requires ALD+Topview')."
-            "\n3. **Do Not Generalize:** Pay close attention to row-specific or item-specific notes. "
+            "\n4. **Do Not Generalize:** Pay close attention to row-specific or item-specific notes. "
             "DO NOT assume all samples share the same prep or route conditions unless explicitly stated as 'applies to all'."
-            "\n4. **Infer Hidden Steps (Domain Knowledge):**"
+            "\n5. **Infer Hidden Steps (Domain Knowledge):**"
             "   - 'Easy-Lift' / 'Nano-probing' implies Route='Probing'."
             "   - 'Epoxy' or 'Glue' implies Prepare='M-bond'."
         )
@@ -371,9 +276,9 @@ class OrderInfo(BaseModel):
             "\n\nParsing Strategy:"
             "\n1. **Table/List Iteration:** Treat each row in a data table or each bullet point in the email body as a potential independent `SampleInfo` object."
             "\n2. **One Object per Entity:** Even if multiple Wafer IDs are listed in a single line, if they represent distinct physical samples, split them into separate objects."
-            "\n3. **Global vs. Local Context (Inheritance):** "
-            "   - If instructions (e.g., 'Route', 'Prepare') are stated at the top of the email or table header as 'applies to all', "
-            "     propagate this information to every `SampleInfo` object unless a specific row overrides it."
+            # "\n3. **Global vs. Local Context (Inheritance):** "
+            # "   - If instructions (e.g., 'Route', 'Prepare') are stated at the top of the email or table header as 'applies to all', "
+            # "     propagate this information to every `SampleInfo` object unless a specific row overrides it."
         )
     )
 

@@ -1,6 +1,7 @@
 from langchain_community.vectorstores import Qdrant
 from langchain_qdrant import QdrantVectorStore
 from langchain_community.embeddings.fastembed import FastEmbedEmbeddings
+from langchain_qdrant import FastEmbedSparse
 # from langchain_openai import OpenAIEmbeddings 
 from qdrant_client import QdrantClient
 from typing import List, Dict
@@ -15,6 +16,7 @@ class DynamicFewShotRetriever:
         
         # 必須與 build_vector_db 使用相同的 Embedding 模型
         self.embeddings = FastEmbedEmbeddings(model_name="nomic-ai/nomic-embed-text-v1.5")
+        self.sparse_embeddings = FastEmbedSparse(model_name="Qdrant/bm25")
 
         # 初始化兩個 Vector Store
         self.client = QdrantClient(path=self.db_path)
@@ -24,13 +26,17 @@ class DynamicFewShotRetriever:
         self.vs_english = QdrantVectorStore(
             client=self.client, 
             collection_name=self.col_english,
-            embedding=self.embeddings
+            embedding=self.embeddings,
+            # sparse_embedding=self.sparse_embeddings,
+            # retrieval_mode="hybrid"
         )
         
         self.vs_original = QdrantVectorStore(
             client=self.client,
             collection_name=self.col_original,
-            embedding=self.embeddings
+            embedding=self.embeddings,
+            # sparse_embedding=self.sparse_embeddings,
+            # retrieval_mode="hybrid"
         )
 
     def get_few_shot_examples(self, query_text: str, k: int = 5) -> List[Dict]:
@@ -69,7 +75,7 @@ class DynamicFewShotRetriever:
         for doc in selected_docs:
             full_text = doc.page_content
 
-            limit = 6000 
+            limit = 12000 
             if len(full_text) > limit:
                 truncated_content = full_text[:limit] + "\n...[Content Truncated]..."
             else:

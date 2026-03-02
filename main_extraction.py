@@ -61,41 +61,44 @@ def process_lot_request(lot_directory: str, lot_id_override: str = None):
     else:
         debug_lot_id = os.path.basename(lot_directory)
 
-    # def build_smart_query(text: str) -> str:
-    #     """
-    #     過濾掉問候語、免責聲明等雜訊，只提取包含半導體術語的行，
-    #     組成高密度的查詢字串，以提升 Embedding 檢索的精準度。
-    #     """
-    #     # 定義高價值的領域關鍵字 (全小寫)
-    #     keywords = [
-    #         "sample", "wafer", "route", "prepare", "cut", "tem", "fib", 
-    #         "ald", "db", "epoxy", "probing", "condition", "recipe", 
-    #         "x-cut", "y-cut", "thickness", "target", "lot", "die", "layer", "pad", "eds",
-    #         "process", "flow", "analysis", "test", "req", "require"
-    #     ]
-        
-    #     lines = text.split('\n')
-    #     important_lines = []
-        
-    #     for line in lines:
-    #         # 只要該行包含任何一個關鍵字，就保留
-    #         if any(k in line.lower() for k in keywords):
-    #             important_lines.append(line.strip())
-        
-    #     # 將這些高價值行組合起來
-    #     condensed_text = "\n".join(important_lines)
-        
-    #     # 限制在 8000 字元內 (確保符合 Jina 8192 token 模型上限)
-    #     return condensed_text[:8000]
+    # llm = ChatOpenAI(
+    #     model=MODEL_NAME,
+    #     openai_api_base=LLM_API_BASE,
+    #     openai_api_key="EMPTY",
+    #     temperature=0, 
+    #     top_p=0.1,
+    #     frequency_penalty=0.0,
+    #     presence_penalty=0.0,
+    #     max_tokens=8192
+    # )
 
-    # 產生專門用來檢索的濃縮查詢
-    # search_query = build_smart_query(input_text)
+    # # 新增：利用 LLM 產生高密度的 Retrieval Query
+    # print("Generating dense retrieval query via LLM...")
+    # query_prompt = ChatPromptTemplate.from_template(
+    #     "You are an expert semiconductor engineer. Extract the core technical requirements "
+    #     "from the following text (e.g., required processes like TEM, ALD, FIB, probing, "
+    #     "DB positioning, thickness, and specific materials like Epoxy or Pi-bond). "
+    #     "Output ONLY a concise, comma-separated list of technical keywords and requirements. "
+    #     "Do NOT include greetings, email boilerplate, or conversational text.\n\n"
+    #     "Text:\n{text}"
+    # )
+    
+    # query_chain = query_prompt | llm
+    
+    # try:
+    #     # 只取前 8000 字元給 LLM 總結，避免超過 Context Window，也節省運算
+    #     summary_response = query_chain.invoke({"text": input_text[:8000]})
+    #     search_query = summary_response.content.strip()
+    #     print(f"  [Smart Query Generated]: {search_query}")
+    # except Exception as e:
+    #     print(f"  [Smart Query Error]: {e}. Falling back to raw text.")
+    #     search_query = input_text[:8000]
 
     search_query = input_text[:8000]
 
     try:
         retriever = DynamicFewShotRetriever(DB_PATH)
-        few_shot_examples = retriever.get_few_shot_examples(search_query, k=4)
+        few_shot_examples = retriever.get_few_shot_examples(search_query, k=3)
         print(f"Retrieved {len(few_shot_examples)} similar past cases.")
 
         print("\n[RAG Debug] Selected Few-shot Examples (Full Answers):")
@@ -132,32 +135,29 @@ def process_lot_request(lot_directory: str, lot_id_override: str = None):
         "### CORE RULES:\n"
         "1. **VENDOR ROLE:** You represent MSS. The 'customer' is the external client (e.g., TEL). NEVER list MSS, Panquan, or internal employees (Katie, Chen Jiaxin, David, Amy) as the customer_name.\n"
         "2. **CURRENT CASE ONLY:** Extract data ONLY from the '=== CURRENT TARGET CASE ===' section. Do NOT extract Wafer IDs from the historical examples.\n"
-        "3. **SAMPLE MATCHING:** Use 'Navi map' or 'Macro' names to match the exact Wafer IDs in the table to the engineer's instructions in the emails.\n\n"
+        "3. For each sample, write your step-by-step logic in the thought_process field before determining the route and prepare values.\n"
+        "4. **SAMPLE MATCHING:** Use 'Navi map' or 'Macro' names to match the exact Wafer IDs in the table to the engineer's instructions in the emails.\n\n"
 
         "### HOW TO BUILD THE 'PREPARE' FIELD (Dynamic SOP Logic):\n"
-        "- **Explicit Parameters:** If the current case PPT/email provides exact parameters (e.g., 'ALD(W2-A)', 'Pi-bond(60/30)'), use them exactly.\n"
-        "- **Vague Parameters (History Fallback):** If the email uses vague terms like 'ALD Coating', 'HfO2', 'Epoxy', or 'Glue', you MUST look at how the 'HISTORICAL REFERENCE CASES' handled similar macros. \n"
-        "  - E.g., If the customer asks for 'Epoxy', look at the historical cases. If they previously used 'Pi bond(60/30)' for this macro, output 'Pi bond(60/30)'. If they used 'M-bond(60/30)', output 'M-bond(60/30)'.\n"
+        "- **Explicit Parameters:** If the current case PPT/email provides exact parameters (e.g., 'ALD([Specific Cycle])', '[Specific Material]-bond([Ratio])'), use them exactly as written in the target text.\n"
+        "- **Vague Parameters (History Fallback):** If the email uses vague terms like 'ALD Coating', 'HfO2', 'epoxy', or 'Glue', you MUST look at how the 'HISTORICAL REFERENCE CASES' handled similar macros. \n"
+        "  - E.g., If the customer asks for 'epoxy', **MUST** look at the historical cases. If they previously used 'Pi bond(60/30)' for this macro, output 'Pi bond(60/30)'. If they used 'M-bond(60/30)', output 'M-bond(60/30)'.\n"
         "  - E.g., If they ask for 'ALD', look at the history to find the exact cycle count (like 'W2 35cycle').\n"
         "- **Additional Steps:**\n"
         "  - If 'Topview' or 'Planview' is requested, add '+ Top view'.\n"
-        "  - If 'DB-located' or 'DB positioning' is requested, add '+ DB positioning'.\n"
+        "  - If 'DB-located' or 'DB positioning' is requested, add '+ DB'.\n"
         "  - If 'Probing' is requested, add '+ Probing'.\n\n"
 
         "### HOW TO BUILD THE 'ROUTE' FIELD:\n"
-        "- If 'Probing' is required for the sample -> Output exactly 'ALD+Probing'.\n"
-        "- If 'Topview' is required (but no probing) -> Output exactly 'ALD+TOP view+ TEM'.\n"
-        "- If neither is required -> Output exactly 'ALD+normal' or 'FIB_XS ALD+ Normal FIB'.\n"
         "- Do NOT invent routes. Output exactly ONE valid string.\n"
     )
 
     final_prompt = ChatPromptTemplate.from_messages(
         [
-            # Format instructions are injected safely here, away from the document body
-            ("system", system_instruction + "\n\n### OUTPUT FORMAT INSTRUCTIONS ###\n{format_instructions}"),
-            ("human", "Here are some reference examples from the database. Pay attention to how they map instructions to samples, but DO NOT EXTRACT their Wafer IDs:"),
+            ("system", system_instruction),
+            ("human", "Here are some reference examples from the database. Pay attention to how they map instructions to samples, but DO NOT EXTRACT their Wafer IDs:\n<historical_examples>"),
             few_shot_prompt, 
-            ("human", "=== CURRENT TARGET CASE STARTS HERE (EXTRACT THIS ONLY) ===\n\n{input}\n\n=== CURRENT TARGET CASE ENDS HERE ==="),
+            ("human", "</historical_examples>\n\n<target_case>\n{input}\n</target_case>\n\nCRITICAL: Extract data strictly from within the <target_case> tags. Do not use parameters from the historical examples."),
         ]
     )
 
@@ -172,124 +172,64 @@ def process_lot_request(lot_directory: str, lot_id_override: str = None):
         presence_penalty=0.0,
         max_tokens=8192
     )
+    # 啟用 API 層級的 Structured Outputs，將 OrderInfo Schema 綁定到模型
+    structured_llm = llm.with_structured_output(OrderInfo)
     
-    parser = PydanticOutputParser(pydantic_object=OrderInfo)
-    
-    # 注入 Format Instructions (告訴 LLM JSON Schema)
-    format_instructions = parser.get_format_instructions()
-    
-    # 建立 Chain
-    chain = final_prompt | llm
+    # 建立 Chain (不需要 parser)
+    chain = final_prompt | structured_llm
 
     # [Debug Step 1] 組合最終 Prompt 內容並存檔檢查
-    final_input_payload = {
-        "input": input_text
-    }
-    
-    # 這裡我們手動 format 一次來看看 (因為 chain 封裝了 prompt，看不到組合後的樣子)
-    debug_prompt_str = final_prompt.format(
-        input=final_input_payload["input"],
-        format_instructions=format_instructions
-    )
+    debug_prompt_str = final_prompt.format(input=input_text)
     
     with open(f"data/output/three_cases_debug_prompt/DEBUG_FINAL_PROMPT_{debug_lot_id}.txt", "w", encoding="utf-8") as f:
         f.write(debug_prompt_str)
         
-    print(f"[Debug] Final prompt saved to DEBUG_FINAL_PROMPT.txt. Please check it!")
+        f.write("\n\n" + "="*50 + "\n")
+        f.write("[DEBUG] FULL FEW-SHOT ANSWERS\n")
+        f.write("="*50 + "\n")
+        for idx, ex in enumerate(few_shot_examples):
+            f.write(f"\n--- Example #{idx + 1} Answer ---\n")
+            f.write(str(ex.get('answer', '')))
+        
+    print(f"[Debug] Final prompt saved to DEBUG_FINAL_PROMPT_{debug_lot_id}..txt. Please check it!")
 
-    print("Invoking LLM for extraction...")
+    print("Invoking LLM with Structured Outputs for precise extraction...")
 
     try:
-        # Pass input_text and format_instructions separately to the prompt template
-        # The prompt template will handle combining them properly
-        
-        raw_response = chain.invoke({
-            "input": input_text,
-            "format_instructions": format_instructions
-        })
-    
-        if hasattr(raw_response, 'content'):
-            raw_content = raw_response.content
-        else:
-            raw_content = str(raw_response)
+        # 直接執行 invoke，回傳的就會是經過嚴格驗證的 OrderInfo Pydantic 物件
+        final_order = chain.invoke({"input": input_text})
 
-        # [Debug] 印出前 500 字確認內容
-        print(f"\n[Raw LLM Output Preview]:\n{raw_content[:500]}...\n")
-
-        raw_content = clean_and_extract_json(raw_content)
-
-        print("Parsing JSON output...")
-        try:
-            data = json_repair.loads(raw_content)
-            
-            # Bulletproof fallback if it's still a string
-            if isinstance(data, str):
-                try:
-                    data = json.loads(data)
-                except:
-                    print(f"  [JSON Error] Could not parse string into dict. Forcing empty dict.")
-                    data = {"samples": []}
-            
-            if not isinstance(data, dict):
-                print(f"  [Critical] Parsed output is type {type(data)}. Forcing empty dict.")
-                data = {"samples": []}
-
-        except Exception as e:
-            print(f"  [JSON Error] JSON parsing failed: {e}")
-            data = {"samples": []}
-
-        # B. 逐筆驗證 Samples (過濾掉爛尾的項目)
-        valid_samples = []
-        raw_samples = data.get("samples", [])
-        
-        if isinstance(raw_samples, list):
-            for i, item in enumerate(raw_samples):
-                try:
-                    # 嘗試將這個 dict 轉為 SampleInfo 物件
-                    # 這會觸發我們寫的所有 Validators (Route check, Epoxy fix 等)
-                    sample_obj = SampleInfo(**item)
-                    valid_samples.append(sample_obj)
-                except ValidationError as ve:
-                    # 這裡就是攔截 "Field required" 的地方
-                    print(f"  [Skipping] Invalid sample #{i+1}: Missing fields or validation failed.")
-                    print(f"    Reason: {ve}") # 需要詳細除錯再打開
-                    continue
-        
-        # C. 重新組裝 OrderInfo
-        # 即使 data 裡面的 global_analysis 也是空的，給個預設值，保證流程能往下走
-        try:
-            final_order = OrderInfo(
-                global_analysis=data.get("global_analysis", "Analysis text missing or truncated"),
-                company=data.get("company"),
-                customer_name=data.get("customer_name"),
-                samples=valid_samples # 這裡只放成功的 samples
-            )
-            
-            print(f"\n=== Extraction Result (Recovered {len(valid_samples)}/{len(raw_samples)} samples) ===")
-            
-            # [Post-processing] Lot ID 重新編號 (因為可能有 sample 被跳過，重新排序比較保險)
-            lot_base_name = os.path.basename(lot_directory) 
-            for idx, sample in enumerate(final_order.samples):
-                suffix = f"{idx + 1:03d}"
-                sample.lot_id = f"{lot_base_name}-{suffix}"
-
-            print(final_order.model_dump_json(indent=2))
-            return final_order
-
-        except ValidationError as ve:
-            print(f"  [Critical] OrderInfo Level Validation Failed: {ve}")
+        if not final_order:
+            print("  [Critical] Model failed to return valid structured output.")
             return None
+        
+        # 過濾掉可能因為幻覺產生但內容完全空洞的 sample
+        valid_samples = [s for s in final_order.samples if s.wafer_id]
+
+        print(f"\n=== Extraction Result (Recovered {len(valid_samples)} samples) ===")
+        
+        # [Post-processing] Lot ID 重新編號
+        lot_base_name = os.path.basename(lot_directory) 
+        for idx, sample in enumerate(valid_samples):
+            suffix = f"{idx + 1:03d}"
+            sample.lot_id = f"{lot_base_name}-{suffix}"
+
+        # 寫回過濾後的 samples
+        final_order.samples = valid_samples
+
+        print(final_order.model_dump_json(indent=2))
+        return final_order
     
     except Exception as e:
-        print(f"LLM Extraction Failed: {e}")
+        print(f"LLM Extraction with Structured Outputs Failed: {e}")
         return None
 
 if __name__ == "__main__":
     # Batch test: run three cases and save outputs to a timestamped file
     cases = [
         "data/raw/all_cases/T25100101",
-        "data/raw/Kang_Yi_Lin_Merged/T25082545",
-        "data/raw/Kang_Yi_Lin_Merged/T251020101",
+        # "data/raw/Kang_Yi_Lin_Merged/T25082545",
+        # "data/raw/Kang_Yi_Lin_Merged/T251020101",
     ]
 
     results = []
@@ -297,8 +237,8 @@ if __name__ == "__main__":
     # Load ground-truth answer files (if present)
     gt_all_cases = []
     gt_kyl = {}
-    all_cases_gt_path = os.path.join("answers", "answer_with_wafer_id_processed.json")
-    kyl_gt_path = os.path.join("answers", "Kang_Yi_Lin_case_ground_truth_translated.json")
+    all_cases_gt_path = os.path.join("data/reference/answers", "answer_with_wafer_id_processed.json")
+    kyl_gt_path = os.path.join("data/reference/answers", "Kang_Yi_Lin_case_ground_truth_translated.json")
 
     if os.path.exists(all_cases_gt_path):
         try:

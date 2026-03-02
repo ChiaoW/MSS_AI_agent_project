@@ -19,3 +19,5 @@ langchain-openai
 tqdm
 json_repair
 fastembed
+lxml
+tabulate

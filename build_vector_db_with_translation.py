@@ -9,6 +9,8 @@ from langchain_community.vectorstores import Qdrant
 from langchain_qdrant import QdrantVectorStore
 from langchain_core.documents import Document
 from langchain_community.embeddings.fastembed import FastEmbedEmbeddings
+from langchain_qdrant import FastEmbedSparse
+
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
@@ -168,6 +170,7 @@ def build_database_with_rewrite():
     print(f"\nStep 3: Ingesting {len(documents)} documents into Qdrant...")
 
     embeddings = FastEmbedEmbeddings(model_name="nomic-ai/nomic-embed-text-v1.5")
+    sparse_embeddings = FastEmbedSparse(model_name="Qdrant/bm25")
     
     for doc in documents:
         if len(doc.page_content) > 30000:
@@ -183,6 +186,7 @@ def build_database_with_rewrite():
     vector_store = QdrantVectorStore.from_documents(
         first_batch,
         embeddings,
+        sparse_embedding=sparse_embeddings,
         path=DB_PATH,
         collection_name=COLLECTION_NAME,
         force_recreate=True

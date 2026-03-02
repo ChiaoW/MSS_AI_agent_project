@@ -6,7 +6,6 @@ import zipfile
 import pandas as pd
 from docx import Document
 from pptx import Presentation
-import pdfplumber
 import extract_msg
 import pytesseract
 from PIL import Image
@@ -120,7 +119,10 @@ class UniversalFileProcessor:
                 {
                     "role": "user",
                     "content": [
-                        {"type": "text", "text": "Convert this image to markdown."},
+                        {
+                            "type": "text", 
+                            "text": "Convert this image to markdown. You must strictly use standard markdown table syntax (with '|' and '-') for all tables. Do NOT output any HTML tags such as <table>, <tr>, <th>, or <td> under any circumstances."
+                        },
                         {
                             "type": "image_url",
                             "image_url": {"url": f"data:image/jpeg;base64,{img_str}"}
@@ -159,6 +161,25 @@ class UniversalFileProcessor:
         mss_pattern = r"(?:(?:\*{5,}.*?Notice)|(?:The content of this E-mail may contain)).*?MSSCORPS.*?cooperation\.\s*\*{5,}"
         text = re.sub(mss_pattern, "", text, flags=re.DOTALL | re.IGNORECASE)
         
+        def html_table_to_markdown(match):
+            print('[DEBUG] Enter table to markdown.')
+            html_content = match.group(0)
+            try:
+                # 使用 pandas 讀取 HTML 表格字串
+                dfs = pd.read_html(io.StringIO(html_content))
+                if dfs:
+                    df = dfs[0].astype(str)
+                    # 統一呼叫先前修改過的 Markdown 轉換方法 (需確保已引入或直接在此呼叫 to_markdown)
+                    return df.to_markdown(index=False, tablefmt="pipe")
+            except Exception as e:
+                # 若解析失敗，則保留原樣以避免遺失資料
+                print(f'[DEBUG] Fail to turn to markdown, {e}')
+                return html_content
+            return html_content
+
+        # 使用正規表示式捕捉 <table> 到 </table> 之間的所有內容 (忽略大小寫、跨行比對)
+        text = re.sub(r"(?i)<table.*?>.*?</table>", html_table_to_markdown, text, flags=re.DOTALL)
+        
         text = re.sub(r'\n{3,}', '\n\n', text)
         return text.strip()
     
@@ -170,7 +191,7 @@ class UniversalFileProcessor:
             if re.search(r"R\s*\d+\s+G\s*\d+\s+B\s*\d+", content_str):
                  return ""
             
-            return df.to_markdown(index=False)
+            return df.to_markdown(index=False, tablefmt="pipe")
         except:
             return ""
 
