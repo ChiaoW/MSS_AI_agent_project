@@ -13,7 +13,7 @@ from pydantic import ValidationError
 import json_repair
 
 from file_processor import UniversalFileProcessor
-from pydantic_schema import OrderInfo, SampleInfo
+from pydantic_schema import OrderInfo, SampleInfo, Stage1Order, Stage2Inference
 from rag_retriever import DynamicFewShotRetriever
 
 DB_PATH = "./qdrant_db"
@@ -50,12 +50,10 @@ def process_lot_request(lot_directory: str, lot_id_override: str = None):
         full_context_text = processor.process_directory(lot_directory)
     except Exception as e:
         print(f"Error reading files: {e}")
-        return None
-
+        return None, None
 
     input_text = truncate_text(full_context_text, max_chars=40000)
 
-    # Determine lot_id for debug file naming
     if lot_id_override is not None:
         debug_lot_id = lot_id_override
     else:
@@ -66,168 +64,143 @@ def process_lot_request(lot_directory: str, lot_id_override: str = None):
     with open(f"data/output/debug_prompt/{debug_lot_id}.txt", "w", encoding="utf-8") as f:
         f.write(full_context_text)
 
-    # llm = ChatOpenAI(
-    #     model=MODEL_NAME,
-    #     openai_api_base=LLM_API_BASE,
-    #     openai_api_key="EMPTY",
-    #     temperature=0, 
-    #     top_p=0.1,
-    #     frequency_penalty=0.0,
-    #     presence_penalty=0.0,
-    #     max_tokens=8192
-    # )
-
-    # # 新增：利用 LLM 產生高密度的 Retrieval Query
-    # print("Generating dense retrieval query via LLM...")
-    # query_prompt = ChatPromptTemplate.from_template(
-    #     "You are an expert semiconductor engineer. Extract the core technical requirements "
-    #     "from the following text (e.g., required processes like TEM, ALD, FIB, probing, "
-    #     "DB positioning, thickness, and specific materials like Epoxy or Pi-bond). "
-    #     "Output ONLY a concise, comma-separated list of technical keywords and requirements. "
-    #     "Do NOT include greetings, email boilerplate, or conversational text.\n\n"
-    #     "Text:\n{text}"
-    # )
-    
-    # query_chain = query_prompt | llm
-    
-    # try:
-    #     # 只取前 8000 字元給 LLM 總結，避免超過 Context Window，也節省運算
-    #     summary_response = query_chain.invoke({"text": input_text[:8000]})
-    #     search_query = summary_response.content.strip()
-    #     print(f"  [Smart Query Generated]: {search_query}")
-    # except Exception as e:
-    #     print(f"  [Smart Query Error]: {e}. Falling back to raw text.")
-    #     search_query = input_text[:8000]
-
-    search_query = input_text[:8000]
-
-    try:
-        retriever = DynamicFewShotRetriever(DB_PATH)
-        few_shot_examples = retriever.get_few_shot_examples(search_query, k=3)
-        print(f"Retrieved {len(few_shot_examples)} similar past cases.")
-
-        print("\n[RAG Debug] Selected Few-shot Examples (Full Answers):")
-        for idx, ex in enumerate(few_shot_examples):
-            print(f"  Example #{idx + 1}")
-            
-            # 印出完整答案
-            full_answer = ex.get('answer', '')
-            print(f"    Answer Content:\n{full_answer}")
-            print("-" * 30)
-        print("==========================================\n")
-
-    except Exception as e:
-        print(f"RAG Error (fallback to empty examples): {e}")
-        few_shot_examples = []
-
-    example_prompt = ChatPromptTemplate.from_messages(
-        [
-            ("human", "=== HISTORICAL REFERENCE CASE (DO NOT EXTRACT WAFER IDs FROM THIS) ===\n\n{context_text}\n\n=== END OF HISTORICAL CASE ==="),
-            ("ai", "{answer}"),
-        ]
-    )
-
-    # 建立 Few-Shot Template
-    few_shot_prompt = FewShotChatMessagePromptTemplate(
-        example_prompt=example_prompt,
-        examples=few_shot_examples, # 這裡是動態注入的 RAG 結果
-    )
-    
-    system_instruction = (
-        "You are an expert semiconductor order extraction agent. "
-        "Your task is to extract information into the requested JSON schema.\n\n"
-
-        "### CORE RULES:\n"
-        "1. **VENDOR ROLE:** You represent MSS. The 'customer' is the external client (e.g., TEL). NEVER list MSS, Panquan, or internal employees (Katie, Chen Jiaxin, David, Amy) as the customer_name.\n"
-        "2. **CURRENT CASE ONLY:** Extract data ONLY from the '=== CURRENT TARGET CASE ===' section. Do NOT extract Wafer IDs from the historical examples.\n"
-        "3. For each sample, write your step-by-step logic in the thought_process field before determining the route and prepare values.\n"
-        "4. **SAMPLE MATCHING:** Use 'Navi map' or 'Macro' names to match the exact Wafer IDs in the table to the engineer's instructions in the emails.\n\n"
-
-        "### HOW TO BUILD THE 'PREPARE' FIELD (Dynamic SOP Logic):\n"
-        "- **Explicit Parameters:** If the current case PPT/email provides exact parameters (e.g., 'ALD([Specific Cycle])', '[Specific Material]-bond([Ratio])'), use them exactly as written in the target text.\n"
-        "- **Vague Parameters (History Fallback):** If the email uses vague terms like 'ALD Coating', 'HfO2', 'epoxy', or 'Glue', you MUST look at how the 'HISTORICAL REFERENCE CASES' handled similar macros. \n"
-        "  - E.g., If the customer asks for 'epoxy', **MUST** look at the historical cases. If they previously used 'Pi bond(60/30)' for this macro, output 'Pi bond(60/30)'. If they used 'M-bond(60/30)', output 'M-bond(60/30)'.\n"
-        "  - E.g., If they ask for 'ALD', look at the history to find the exact cycle count (like 'W2 35cycle').\n"
-        "- **Additional Steps:**\n"
-        "  - If 'Topview' or 'Planview' is requested, add '+ Top view'.\n"
-        "  - If 'DB-located' or 'DB positioning' is requested, add '+ DB'.\n"
-        "  - If 'Probing' is requested, add '+ Probing'.\n\n"
-
-        "### HOW TO BUILD THE 'ROUTE' FIELD:\n"
-        "- Do NOT invent routes. Output exactly ONE valid string.\n"
-    )
-
-    final_prompt = ChatPromptTemplate.from_messages(
-        [
-            ("system", system_instruction),
-            ("human", "Here are some reference examples from the database. Pay attention to how they map instructions to samples, but DO NOT EXTRACT their Wafer IDs:\n<historical_examples>"),
-            few_shot_prompt, 
-            ("human", "</historical_examples>\n\n<target_case>\n{input}\n</target_case>\n\nCRITICAL: Extract data strictly from within the <target_case> tags. Do not use parameters from the historical examples."),
-        ]
-    )
-
-    # 4. LLM & Parser Setup
+    # 初始化統一的 LLM 實例
     llm = ChatOpenAI(
         model=MODEL_NAME,
         openai_api_base=LLM_API_BASE,
         openai_api_key="EMPTY",
-        temperature=0, # 資訊萃取務必設為 0
+        temperature=0.1, 
         top_p=0.1,
         frequency_penalty=0.0,
         presence_penalty=0.0,
         max_tokens=8192
     )
-    # 啟用 API 層級的 Structured Outputs，將 OrderInfo Schema 綁定到模型
-    structured_llm = llm.with_structured_output(OrderInfo)
-    
-    # 建立 Chain (不需要 parser)
-    chain = final_prompt | structured_llm
 
-    # [Debug Step 1] 組合最終 Prompt 內容並存檔檢查
-    debug_prompt_str = final_prompt.format(input=input_text)
-    
-    with open(f"data/output/three_cases_debug_prompt/DEBUG_FINAL_PROMPT_{debug_lot_id}.txt", "w", encoding="utf-8") as f:
-        f.write(debug_prompt_str)
-        
-        f.write("\n\n" + "="*50 + "\n")
-        f.write("[DEBUG] FULL FEW-SHOT ANSWERS\n")
-        f.write("="*50 + "\n")
-        for idx, ex in enumerate(few_shot_examples):
-            f.write(f"\n--- Example #{idx + 1} Answer ---\n")
-            f.write(str(ex.get('answer', '')))
-        
-    print(f"[Debug] Final prompt saved to DEBUG_FINAL_PROMPT_{debug_lot_id}..txt. Please check it!")
+    # RAG 檢索：改回使用完整文本的前段來抓取歷史範例
+    search_query = input_text[:8000]
+    retriever = DynamicFewShotRetriever(DB_PATH)
+    try:
+        few_shot_examples = retriever.get_few_shot_examples(search_query, k=3)
+    except Exception as e:
+        print(f"     [RAG Error]: {e}")
+        few_shot_examples = []
 
-    print("Invoking LLM with Structured Outputs for precise extraction...")
+    example_prompt = ChatPromptTemplate.from_messages([
+        ("human", "=== HISTORICAL REFERENCE CASE ===\n{context_text}\n=== END OF HISTORICAL CASE ==="),
+        ("ai", "{answer}"),
+    ])
+    
+    few_shot_prompt = FewShotChatMessagePromptTemplate(
+        example_prompt=example_prompt,
+        examples=few_shot_examples,
+    )
+
+    print("Stage 1: Entity Extraction (Slicing text into raw samples)...")
+    
+    stage1_instruction = (
+        "You are an expert semiconductor entity extraction agent. "
+        "Your ONLY task is to extract the customer metadata and list ALL unique Wafer IDs / Sample IDs present.\n"
+        "### CORE RULES:\n"
+        "1. VENDOR ROLE: You represent MSS. The 'customer' and 'company' refer to external clients. NEVER list MSS or internal employees.\n"
+        "2. LEARNING FROM HISTORY: Look at the provided historical examples to understand what a valid 'Wafer ID' looks like for this specific customer (e.g., alphanumeric codes, format, and where they typically appear in tables or text). "
+        "However, DO NOT extract Wafer IDs from the historical cases.\n"
+        "3. ANTI-LOOP CRITICAL: DO NOT duplicate Wafer IDs. Once you have listed all unique IDs, you MUST stop generating. Do not repeat the same ID."
+    )
+
+    stage1_prompt = ChatPromptTemplate.from_messages([
+        ("system", stage1_instruction),
+        ("human", "Here are historical examples. Pay close attention to how Wafer IDs are formatted and extracted in these cases:\n<historical_examples>"),
+        few_shot_prompt,
+        ("human", "</historical_examples>\n\nNow, identify the entities strictly from the following new case:\n\n<target_case>\n{input}\n</target_case>")
+    ])
+
+    stage1_chain = stage1_prompt | llm.with_structured_output(Stage1Order)
 
     try:
-        # 直接執行 invoke，回傳的就會是經過嚴格驗證的 OrderInfo Pydantic 物件
-        final_order = chain.invoke({"input": input_text})
-
-        if not final_order:
-            print("  [Critical] Model failed to return valid structured output.")
-            return None
-        
-        # 過濾掉可能因為幻覺產生但內容完全空洞的 sample
-        valid_samples = [s for s in final_order.samples if s.wafer_id]
-
-        print(f"\n=== Extraction Result (Recovered {len(valid_samples)} samples) ===")
-        
-        # [Post-processing] Lot ID 重新編號
-        lot_base_name = os.path.basename(lot_directory) 
-        for idx, sample in enumerate(valid_samples):
-            suffix = f"{idx + 1:03d}"
-            sample.lot_id = f"{lot_base_name}-{suffix}"
-
-        # 寫回過濾後的 samples
-        final_order.samples = valid_samples
-
-        print(final_order.model_dump_json(indent=2))
-        return final_order
-    
+        stage1_result = stage1_chain.invoke({"input": input_text})
+        if not stage1_result or not stage1_result.samples:
+            print("  [Critical] Stage 1 failed to return valid samples.")
+            return None, None
+        print(f"  -> Extracted {len(stage1_result.samples)} raw samples.")
     except Exception as e:
-        print(f"LLM Extraction with Structured Outputs Failed: {e}")
-        return None
+        print(f"Stage 1 Extraction Failed: {e}")
+        return None, None
+
+    # ==========================================
+    # 階段二：邏輯推論 (Logic Inference)
+    # ==========================================
+    print("\nStage 2: Logic Inference (Processing each sample individually)...")
+    
+    stage2_instruction = (
+        "You are an expert semiconductor order logic inference agent. "
+        "Your task is to analyze the ENTIRE provided case text, but extract the exact technical parameters ONLY for the specific TARGET WAFER ID requested.\n\n"
+        "### HOW TO BUILD THE 'PREPARE' FIELD:\n"
+        "- Explicit Parameters: Use exact parameters if present (e.g., 'ALD(W2-A)').\n"
+        "- **Explicit Parameters:** If the current case PPT/email provides exact parameters (e.g., 'ALD([Specific Cycle])', '[Specific Material]-bond([Ratio])'), use them exactly as written in the target text.\n"
+        "- **Vague Parameters (History Fallback):** If the email uses vague terms like 'ALD Coating', 'HfO2', 'epoxy', or 'Glue', you MUST look at how the 'HISTORICAL REFERENCE CASES' handled similar macros. \n"
+        "- Extra steps: Add '+ Top view', '+ DB', or '+ Probing' if explicitly requested.\n\n"
+        "### HOW TO BUILD THE 'ROUTE' FIELD:\n"
+        "- Select the exact matching standard process route code from the internal list."
+    )
+
+    final_samples = []
+    lot_base_name = os.path.basename(lot_directory)
+
+    stage2_prompt = ChatPromptTemplate.from_messages([
+        ("system", stage2_instruction),
+        ("human", "Here are some reference examples from the database. Pay attention to how they map instructions to samples, but DO NOT EXTRACT their Wafer IDs:\n<historical_examples>"),
+        few_shot_prompt, 
+        ("human", "</historical_examples>\n\n"
+                  "Now, read the entire case and infer the parameters STRICTLY for the TARGET WAFER ID.\n\n"
+                  "TARGET WAFER ID: {wafer_id}\n\n"
+                  "=== FULL CASE CONTEXT ===\n"
+                  "{full_text}\n"
+                  "=== END OF CASE CONTEXT ===")
+    ])
+
+    stage2_chain = stage2_prompt | llm.with_structured_output(Stage2Inference)
+
+    for idx, raw_sample in enumerate(stage1_result.samples):
+        if not raw_sample.wafer_id:
+            continue
+            
+        print(f"  -> Inferring parameters for Wafer ID: {raw_sample.wafer_id}")
+
+        try:
+            inference_result = stage2_chain.invoke({
+                "wafer_id": raw_sample.wafer_id,
+                "full_text": input_text
+            })
+            
+            suffix = f"{idx + 1:03d}"
+            final_sample = SampleInfo(
+                lot_id=f"{lot_base_name}-{suffix}",
+                wafer_id=raw_sample.wafer_id,
+                thought_process=inference_result.thought_process,
+                route=inference_result.route,
+                prepare=inference_result.prepare,
+                loctestkey=inference_result.loctestkey
+            )
+            final_samples.append(final_sample)
+            
+        except Exception as e:
+            print(f"     [Inference Error] Failed for {raw_sample.wafer_id}: {e}")
+
+    # ==========================================
+    # 組合最終輸出 (Combine Final Result)
+    # ==========================================
+    final_order = OrderInfo(
+        global_analysis=stage1_result.global_analysis,
+        company=stage1_result.company,
+        customer_name=stage1_result.customer_name,
+        samples=final_samples
+    )
+
+    print(f"\n=== Final Extraction Result (Processed {len(final_samples)} samples) ===")
+    print(final_order.model_dump_json(indent=2))
+    
+    return final_order, few_shot_examples
+
 
 if __name__ == "__main__":
     # Batch test: run three cases and save outputs to a timestamped file
@@ -293,7 +266,7 @@ if __name__ == "__main__":
             try:
                 # Use the last part of the directory as lot_id for debug file naming
                 lot_id_for_debug = os.path.basename(case_dir)
-                res = process_lot_request(case_dir, lot_id_override=lot_id_for_debug)
+                res, debug_info = process_lot_request(case_dir, lot_id_override=lot_id_for_debug)
                 if res is None:
                     results.append((case_dir, "<No result or parsing failed>"))
                 else:
@@ -319,7 +292,8 @@ if __name__ == "__main__":
                     # Build combined content: prediction then ground-truth matches
                     combined = {
                         "prediction": json.loads(pred_json) if pred_obj is not None else pred_json,
-                        "ground_truth_matches": gt_matches
+                        "ground_truth_matches": gt_matches,
+                        "rag_few_shot_examples": debug_info
                     }
                     results.append((case_dir, json.dumps(combined, indent=2, ensure_ascii=False)))
             except Exception as e:
@@ -329,7 +303,7 @@ if __name__ == "__main__":
 
     # Save aggregated results to a timestamped file
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-    out_fname = f"data/output/three_cases_predict_results/results_{ts}.txt"
+    out_fname = f"data/output/prediction_results/split_results_{ts}.txt"
     with open(out_fname, "w", encoding="utf-8") as outf:
         for case_dir, content in results:
             outf.write(f"=== CASE: {case_dir} ===\n")

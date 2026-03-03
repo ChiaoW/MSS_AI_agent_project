@@ -1,3 +1,4 @@
+from ast import pattern
 import os
 import re
 import tempfile
@@ -51,6 +52,7 @@ class UniversalFileProcessor:
             if ext == '.txt':
                 with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
                     content =self._clean_email_body(f.read())
+                    # content =f.read()
             elif ext in [".csv", ".xls", ".xlsx"]:
                 content =self._read_spreadsheet(file_path)
             elif ext == '.docx':
@@ -150,9 +152,8 @@ class UniversalFileProcessor:
         if not text: return ""
         
         # 清除 Email Header
-        header_block_pattern = r"(?i)From:\s*.*?(?:Sent:|Date:)\s*.*?(?:Subject:)\s*.*?\n"
-        text = re.sub(header_block_pattern, "\n--- [Email Reply] ---\n", text, flags=re.DOTALL)
-        text = re.sub(r"(?m)^(?:From|To|Cc|Bcc|Sent|Subject|Date):\s*$", "", text)
+        pattern = r"(?m)^(?:Cc|Bcc):.*(?:\n(?!\w+:).*)*"
+        text = re.sub(pattern, "", text)
         
         # 清除免責聲明
         jp_disclaimer = r"本資料の取扱上の注意.*?東京エレクトロン"

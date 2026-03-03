@@ -521,5 +521,20 @@
                 "loctestkey": "Blank"
             }
         ]
+    },
+    {
+        "mail_id": "nan",
+        "email_subject": "nan",
+        "company_name": "TEL(TMEA)",
+        "customer_name": "Yan Shao",
+        "samples": [
+            {
+                "lot_id": "T26022301-001",
+                "wafer_id": "446038",
+                "prepare": "ALD(low-Temp-W2-A) + M-bond(60/30) + TEM",
+                "route": "ALD+Probing",
+                "loctestkey": "X-cut"
+            }
+        ]
     }
 ]

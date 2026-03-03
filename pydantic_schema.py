@@ -145,13 +145,14 @@ class SampleInfo(BaseModel):
         default=None,
         description="""
             [Industry Context: Semiconductor FA/Process]
-            Defines pre-treatment steps BEFORE the main analysis route.
+            Defines pre-treatment steps BEFORE the main analysis route. **Find the "Receipe"**.
 
             [MANDATORY MAPPING RULES]:
             1. **Priority 1 (Explicit Text):** Extract exact parameters if present (e.g., 'ALD(W2-A)', 'M-bond(60/30)').
+               **MUST NOT** write "Coating", "epoxy", "Resin", or "Glue" only.
+               **MUST NOT** write "Coating", "epoxy", "Resin", or "Glue" only.
             2. **Priority 2 (History Inference - CRITICAL):** 
-               - **MUST NOT** just write the generic word like: "ALD", "Coating", "epoxy", "Resin", or "Glue"
-               - Instead, you **MUST** look at the 'HISTORICAL REFERENCE CASES' to find the specific recipe used for this customer/macro (e.g., 'ALD(W2 35cycle)', 'Pi bond(60/30)', or 'M-bond(60/30)') and apply it to the current sample.
+               **MUST** look at the 'HISTORICAL REFERENCE CASES' to find the specific recipe used for this customer/macro (e.g., 'ALD(W2 35cycle)', 'Pi bond(60/30)', or 'M-bond(60/30)') and apply it to the current sample.
 
             [Output Format]
             Combine steps with '+': "Top view+ALD(W2-A)+DB+Pi bond(60/30)+Probing"
@@ -176,29 +177,98 @@ class SampleInfo(BaseModel):
         )
     )
 
+class Stage1Sample(BaseModel):
+    wafer_id: str = Field(
+        ...,
+        description=(
+            "Do NOT list all wafer IDs in the email; only extract the one corresponding to this specific row/item. "
+            "Exclude vague terms like 'wafer' or 'die'. "
+            "The wafer ID or chip ID represents the code or name of the sample or die to be tested."
+        )
+    )
+
+class Stage1Order(BaseModel):
+    """階段一專用：僅抽取全局資訊與實體切分"""
+    global_analysis: str = Field(
+        description="Explicitly state exactly how many Wafer IDs/Samples are present in the text."
+    )
+    company: Optional[str] = Field(
+        default=None,
+        description="Identifies the customer's company or organization name. DO NOT EXTRACT MSS. Same rules as before."
+    )
+    customer_name: Optional[str] = Field(
+        default=None,
+        description="The specific contact person's name representing the customer company."
+    )
+    samples: List[Stage1Sample] = Field(
+        default_factory=list,
+        description="A list of unique samples. CRITICAL: DO NOT output duplicate Wafer IDs. Stop generating when all unique IDs are listed."
+    )
+
+    @field_validator('company')
+    @classmethod
+    def normalize_company_code(cls, v: Optional[str]) -> Optional[str]:
+        if v is None: return v
+        clean_v = v.strip().upper()
+        tsmc_variants = ["TSMC", "TAIWAN SEMICONDUCTOR", "T.S.M.C", "台積電"]
+        if any(variant in clean_v for variant in tsmc_variants):
+            return "230"
+        return v
+
+class Stage2Inference(BaseModel):
+    """階段二專用：針對單一樣本進行邏輯推論"""
+    thought_process: str = Field(
+        description="Step-by-step reasoning for mapping the raw evidence to Route and Prepare parameters."
+    )
+    route: Optional[str] = Field(
+        default=None,
+        description=(
+            "The standard process route code. "
+            "Refers to the specific sequence and combination of manufacturing processes that a sample must undergo."
+            "CRITICAL: You MUST output exactly one of the valid route names from the Route Knowledge Base below:\n"
+            f"\n{route_descriptions_text}"
+        ),
+        json_schema_extra={
+            "enum": active_routes
+        }
+    )
+
+    prepare: Optional[str] = Field(
+        default=None,
+        description="""
+            [Industry Context: Semiconductor FA/Process]
+            Defines pre-treatment steps BEFORE the main analysis route. **Find the "Receipe"**.
+
+            [MANDATORY MAPPING RULES]:
+            1. **Priority 1 (Explicit Text):** Extract exact parameters if present (e.g., 'ALD(W2-A)', 'M-bond(60/30)').
+               **MUST NOT** write "Coating", "epoxy", "Resin", or "Glue" on any step
+               **MUST NOT** write "Coating", "epoxy", "Resin", or "Glue" on any step
+               For example, **MUST NOT** write "ALD(W2-A)+epoxy".
+            2. **Priority 2 (History Inference - CRITICAL):** 
+               **MUST** look at the 'HISTORICAL REFERENCE CASES' to find the specific recipe used for this customer/macro (e.g., 'ALD(W2 35cycle)', 'Pi bond(60/30)', or 'M-bond(60/30)') and apply it to the current sample.
+
+            [Output Format]
+            Combine steps with '+': "Top view+ALD(W2-A)+DB+Pi bond(60/30)+Probing"
+        """
+    )
+    loctestkey: Optional[str] = Field(
+        default=None,
+        description="Specifies the exact target location/coordinates or Macro Name on the sample."
+    )
+
+    # 沿用原有的驗證邏輯
     @field_validator('prepare')
     @classmethod
     def clean_prepare_logic(cls, v: Optional[str]) -> Optional[str]:
-        if not v:
-            return v
-        
+        if not v: return v
         raw_steps = [step.strip() for step in re.split(r'[+,]', v)]
         cleaned_steps = []
-        
         for step in raw_steps:
             step = step.strip()
-            step_lower = step.lower()
-            
-            if not step:
-                continue
-            
-            # --- 處理 Topview 格式 (正規化) ---
-            if 'top' in step_lower and 'view' in step_lower:
+            if not step: continue
+            if 'top' in step.lower() and 'view' in step.lower():
                 step = "Top view"
-
             cleaned_steps.append(step)
-
-        # 去重複 (Deduplication) 同時保持順序
         unique_steps = []
         seen = set()
         for s in cleaned_steps:
@@ -206,26 +276,17 @@ class SampleInfo(BaseModel):
             if s_key not in seen:
                 unique_steps.append(s)
                 seen.add(s_key)
-
         return "+".join(unique_steps)
 
-    
     @field_validator('loctestkey')
     @classmethod
     def clean_loctestkey(cls, v: str) -> str:
-        if not v:
-            return v
-        
-        # A. 移除常見副檔名 (忽略大小寫)
+        if not v: return v
         v = re.sub(r'\.(pdf|pptx?|docx?|txt|xlsx?|jpg|png)$', '', v, flags=re.IGNORECASE)
-        
-        # B. 移除括號內的內容 (如人名 (KYLin), 備註 (Note1))
         v = re.sub(r'\s*\(.*?\)', '', v)
-        
-        # C. 移除頭尾無意義符號
         v = v.strip(' |-,')
-        
         return v.strip()
+    
 
 class OrderInfo(BaseModel):
     """
@@ -252,7 +313,7 @@ class OrderInfo(BaseModel):
         description=(
             "Identifies the customer's company or organization name associated with this request. "
             "\n[ROLE CONTEXT]: You represent 'MSS' (MSSCORPS / Panquan Technology), the testing VENDOR. The 'customer' is the external client sending you samples."
-            "\n[CRITICAL NEGATIVE RULE]: NEVER output 'MSS', 'MSSCORPS', 'MSS USA', or 'Panquan Technology'. Look for the external company (e.g., 'TEL', 'TSMC', 'Nvidia')."
+            "\n**CRITICAL NEGATIVE RULE**: NEVER output 'MSS', 'MSSCORPS', 'MSS USA', or 'Panquan Technology'. Look for the external company (e.g., 'TEL', 'TSMC', 'Nvidia')."
             "\nExtraction Logic: "
             "1. **Email Domain Parsing:** 'user@nvidia.com' -> 'NVIDIA'."
             "2. **TSMC Rule:** If 'TSMC' or 'Taiwan Semiconductor', output '230'."
@@ -282,24 +343,24 @@ class OrderInfo(BaseModel):
         )
     )
 
-    @field_validator('company')
-    @classmethod
-    def normalize_company_code(cls, v: Optional[str]) -> Optional[str]:
-        if v is None:
-            return v
+    # @field_validator('company')
+    # @classmethod
+    # def normalize_company_code(cls, v: Optional[str]) -> Optional[str]:
+    #     if v is None:
+    #         return v
         
-        # 移除前後空白並轉為大寫進行比對
-        clean_v = v.strip().upper()
+    #     # 移除前後空白並轉為大寫進行比對
+    #     clean_v = v.strip().upper()
         
-        # 定義 TSMC 的常見變體
-        tsmc_variants = ["TSMC", "TAIWAN SEMICONDUCTOR", "T.S.M.C", "台積電"]
+    #     # 定義 TSMC 的常見變體
+    #     tsmc_variants = ["TSMC", "TAIWAN SEMICONDUCTOR", "T.S.M.C", "台積電"]
         
-        # 檢查是否包含關鍵字 (模糊比對) 或是完全匹配
-        # 這裡採取嚴格策略：只要字串中包含 TSMC，就強制轉為 230
-        if any(variant in clean_v for variant in tsmc_variants):
-            return "230"
+    #     # 檢查是否包含關鍵字 (模糊比對) 或是完全匹配
+    #     # 這裡採取嚴格策略：只要字串中包含 TSMC，就強制轉為 230
+    #     if any(variant in clean_v for variant in tsmc_variants):
+    #         return "230"
             
-        return v
+    #     return v
 
 # # --- 測試區塊 (只在直接執行此檔案時運作) ---
 # if __name__ == "__main__":
