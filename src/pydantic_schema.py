@@ -205,6 +205,56 @@ class Stage1Order(BaseModel):
         description="A list of unique samples. CRITICAL: DO NOT output duplicate Wafer IDs. Stop generating when all unique IDs are listed."
     )
 
+    # global_analysis: str = Field(
+    #     description=(
+    #         "Execute a Deep Logic Analysis step before extraction:"
+    #         "\n1. **Count Samples:** Explicitly scan the text and tables in the <target_case> and state EXACTLY how many Wafer IDs/Samples are present."
+    #         "\n2. **List all Samples:** Identify each unique sample or Wafer ID present in the 'CURRENT TARGET CASE'."
+    #         "\n3. **Map Specific Instructions (CRITICAL):** For EACH sample, explicitly state what the text or PPT requested. "
+    #         "(e.g., 'Sample A requires ALD+DB+Probing because of X-Cut note. Sample B only requires ALD+Topview')."
+    #         "\n4. **Do Not Generalize:** Pay close attention to row-specific or item-specific notes. "
+    #         "DO NOT assume all samples share the same prep or route conditions unless explicitly stated as 'applies to all'."
+    #         "\n5. **Infer Hidden Steps (Domain Knowledge):**"
+    #         "   - 'Easy-Lift' / 'Nano-probing' implies Route='Probing'."
+    #         "   - 'Epoxy' or 'Glue' implies Prepare='M-bond'."
+    #     )
+    # )
+    
+    # company: Optional[str] = Field(
+    #     default=None,
+    #     description=(
+    #         "Identifies the customer's company or organization name associated with this request. "
+    #         "\n[ROLE CONTEXT]: You represent 'MSS' (MSSCORPS / Panquan Technology), the testing VENDOR. The 'customer' is the external client sending you samples."
+    #         "\n**CRITICAL NEGATIVE RULE**: NEVER output 'MSS', 'MSSCORPS', 'MSS USA', or 'Panquan Technology'. Look for the external company (e.g., 'TEL', 'TSMC', 'Nvidia')."
+    #         "\nExtraction Logic: "
+    #         "1. **Email Domain Parsing:** 'user@nvidia.com' -> 'NVIDIA'."
+    #         "2. **TSMC Rule:** If 'TSMC' or 'Taiwan Semiconductor', output '230'."
+    #     )
+    # )
+    
+    # customer_name: Optional[str] = Field(
+    #     default=None,
+    #     description=(
+    #         "The specific contact person's name representing the customer company. "
+    #         "\n[CRITICAL NEGATIVE RULE]: NEVER extract internal MSS employees. Known MSS employees to IGNORE: 'Katie', 'Chen Jiaxin', 'Amy', 'David Lo', 'Jimmy', 'Nurul', 'PP', 'TEM'."
+    #         "\nExtract the sender from the external customer company (e.g., 'Kang-Yi Lin', 'Hailey Jenkins')."
+    #     )
+    # )
+    
+    # samples: List[SampleInfo] = Field(
+    #     default_factory=list,
+    #     description=(
+    #         "A comprehensive list of all individual samples or test items identified in the email. "
+    #         "This is the core collection of the order."
+    #         "\n\nParsing Strategy:"
+    #         "\n1. **Table/List Iteration:** Treat each row in a data table or each bullet point in the email body as a potential independent `SampleInfo` object."
+    #         "\n2. **One Object per Entity:** Even if multiple Wafer IDs are listed in a single line, if they represent distinct physical samples, split them into separate objects."
+    #         # "\n3. **Global vs. Local Context (Inheritance):** "
+    #         # "   - If instructions (e.g., 'Route', 'Prepare') are stated at the top of the email or table header as 'applies to all', "
+    #         # "     propagate this information to every `SampleInfo` object unless a specific row overrides it."
+    #     )
+    # )
+
     @field_validator('company')
     @classmethod
     def normalize_company_code(cls, v: Optional[str]) -> Optional[str]:
@@ -217,9 +267,17 @@ class Stage1Order(BaseModel):
 
 class Stage2Inference(BaseModel):
     """階段二專用：針對單一樣本進行邏輯推論"""
-    thought_process: str = Field(
-        description="Step-by-step reasoning for mapping the raw evidence to Route and Prepare parameters."
-    )
+    # thought_process: str = Field(
+    #     description=(
+    #         "Execute a Deep Logic Analysis step before extraction:"
+    #         "\n1. **Map Specific Instructions (CRITICAL):** For EACH sample, explicitly state what the text or PPT requested. "
+    #         "\n2. **Do Not Generalize:** Pay close attention to row-specific or item-specific notes. "
+    #         "DO NOT assume all samples share the same prep or route conditions unless explicitly stated as 'applies to all'."
+    #         "\n3. **Infer Hidden Steps (Domain Knowledge):**"
+    #         "   - 'Easy-Lift' / 'Nano-probing' implies Route='Probing'."
+    #         "   - 'Epoxy' or 'Glue' implies Prepare='M-bond'."
+    #     )
+    # )
     route: Optional[str] = Field(
         default=None,
         description=(
@@ -253,7 +311,20 @@ class Stage2Inference(BaseModel):
     )
     loctestkey: Optional[str] = Field(
         default=None,
-        description="Specifies the exact target location/coordinates or Macro Name on the sample."
+        description=(
+            "Specifies the exact target location/coordinates or Macro Name on the sample. "
+            
+            "Key Indicators & Patterns to Extract: "
+            "1. **Directional Cuts:** explicit mentions of 'X-CUT' (X-direction cross-section) or 'Y-CUT' (Y-direction cross-section). "
+            "   - Examples to generate: '23P Y-CUT', 'Pt 5s-XCUT', 'Macro 3G Y-cut'. "
+            "2. **Coordinates/Position Codes:** numerical sequences indicating specific die or structure locations. "
+            "   - Examples to generate: '60-20-03', 'R3-C5'. "
+            "3. **Feature Targeting:** references to locations identified by inspection tools. "
+            "   - Examples to generate: 'AOI' (target the defect found by AOI), 'Hotspot'. "
+            "4. **Macro Name: ** If a 'Macro', 'Navi Map', or 'Target' column exists (e.g., 'XCH', 'Macro 3G Y-cut', 'Spark Ycut 40P', 'DUT2 X-Cut'), use this EXACT string as the loctestkey. "
+
+            "[Constraints]: Do NOT confuse with 'wafer_id'. Remove filenames like .pdf or .pptx."
+        )
     )
 
     # 沿用原有的驗證邏輯

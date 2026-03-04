@@ -75,7 +75,7 @@ class DynamicFewShotRetriever:
         for doc in selected_docs:
             full_text = doc.page_content
 
-            limit = 4000 
+            limit = 8000 
             if len(full_text) > limit:
                 truncated_content = full_text[:limit] + "\n...[Content Truncated]..."
             else:

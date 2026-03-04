@@ -16,7 +16,7 @@ from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 
 # 自定義模組
-from file_processor import UniversalFileProcessor
+from src.file_processor import UniversalFileProcessor
 
 # ==========================================
 # Config
@@ -142,9 +142,17 @@ def build_database_with_rewrite():
             # Placeholder
             raw_text = f"Simonulated content for {lot_id}. No files found."
 
-        # 2. [NEW] AI 改寫/翻譯
-        # 這裡會判斷是否含中文，若有則呼叫 LLM 轉成美式工程英文
-        final_text = rewriter.rewrite_to_american_english(raw_text, lot_id)
+        print(f"\n  -> [Debug] {lot_id} 原始讀取字數: {len(raw_text)}")
+        if len(raw_text.strip()) == 0:
+            print(f"  -> [Warning] {lot_path} 讀出來完全沒字！")
+
+        # 2. AI 改寫/翻譯
+        # final_text = rewriter.rewrite_to_american_english(raw_text, lot_id)
+
+        # print(f"  -> [Debug] {lot_id} 翻譯後字數: {len(final_text)}")
+        # if len(final_text.strip()) == 0:
+        #     print(f"  -> [Critical] LLM 回傳了空字串！強制使用原始文字存入 DB。")
+        #     final_text = raw_text
 
         # 3. 準備 Metadata (作為 Few-Shot 的 Answer)
         output_json_str = json.dumps(data, ensure_ascii=False, indent=2)
@@ -156,7 +164,7 @@ def build_database_with_rewrite():
 
         # 4. 建立 Document
         doc = Document(
-            page_content=final_text, # 存入改寫後的英文
+            page_content=raw_text, # 存入原始文字
             metadata={
                 "lot_id": lot_id,
                 "output_json": output_json_str,

@@ -16,7 +16,7 @@ from langchain_qdrant import FastEmbedSparse
 # 選項 B: 使用 vLLM 的 OpenAI 兼容接口 (若 vLLM 啟動參數包含 --embedding)
 from langchain_openai import OpenAIEmbeddings
 
-from file_processor import UniversalFileProcessor
+from src.file_processor import UniversalFileProcessor
 
 # 設定路徑
 GT_JSON_PATH = "data/reference/ground_truth/ground_truth_with_wafer_id_processed.json"

@@ -21,3 +21,4 @@ json_repair
 fastembed
 lxml
 tabulate
+dspy-ai>=2.5.0
