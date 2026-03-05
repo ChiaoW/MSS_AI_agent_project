@@ -23,7 +23,7 @@ from src.file_processor import UniversalFileProcessor
 # ==========================================
 GT_JSON_PATH = "data/reference/ground_truth/Kang_Yi_Lin_case_ground_truth_translated.json"
 CASES_DIR = "data/raw/Kang_Yi_Lin_Merged"
-DB_PATH = "./qdrant_db"
+DB_URL = "http://localhost:6333"
 COLLECTION_NAME = "semiconductor_orders_english"
 CACHE_FILE = "data/output/translation_cache.json"  # 用來存翻譯過的文字，避免重複跑
 
@@ -195,7 +195,7 @@ def build_database_with_rewrite():
         first_batch,
         embeddings,
         sparse_embedding=sparse_embeddings,
-        path=DB_PATH,
+        url=DB_URL,
         collection_name=COLLECTION_NAME,
         force_recreate=True
     )
@@ -207,7 +207,7 @@ def build_database_with_rewrite():
         vector_store.add_documents(batch)
         print(f"  -> Batch {i//BATCH_SIZE + 1}/{len(documents)//BATCH_SIZE + 1} completed.")
     
-    print(f"SUCCESS: Vector Database built at {DB_PATH} with English-Rewritten content!")
+    print(f"SUCCESS: Vector Database built at {DB_URL}/{COLLECTION_NAME} with English-Rewritten content!")
 
 if __name__ == "__main__":
     build_database_with_rewrite()

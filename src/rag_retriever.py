@@ -9,8 +9,8 @@ import torch
 from langchain_huggingface import HuggingFaceEmbeddings
 
 class DynamicFewShotRetriever:
-    def __init__(self, db_path: str):
-        self.db_path = db_path
+    def __init__(self, db_url: str):
+        self.db_url = db_url
         self.col_english = "semiconductor_orders_english"
         self.col_original = "semiconductor_orders"
         
@@ -19,7 +19,7 @@ class DynamicFewShotRetriever:
         self.sparse_embeddings = FastEmbedSparse(model_name="Qdrant/bm25")
 
         # 初始化兩個 Vector Store
-        self.client = QdrantClient(path=self.db_path)
+        self.client = QdrantClient(url=self.db_url)
         
         # [CRITICAL FIX] 2. 將 client 傳入 VectorStore，而不是傳 path
         # 注意：這裡改用標準建構子，而不是 from_existing_collection (比較好控制 client)

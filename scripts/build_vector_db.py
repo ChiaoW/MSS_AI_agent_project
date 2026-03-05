@@ -21,7 +21,7 @@ from src.file_processor import UniversalFileProcessor
 # 設定路徑
 GT_JSON_PATH = "data/reference/ground_truth/ground_truth_with_wafer_id_processed.json"
 CASES_DIR = "data/raw/all_cases_in_ground_truth"
-DB_PATH = "./qdrant_db"
+DB_URL = "http://localhost:6333"
 COLLECTION_NAME = "semiconductor_orders"
 
 def load_ground_truth_data(json_path: str) -> Dict:
@@ -82,7 +82,7 @@ def build_database():
             documents,
             embeddings,
             sparse_embedding=sparse_embeddings,
-            path=DB_PATH,
+            url=DB_URL,
             collection_name=COLLECTION_NAME,
             force_recreate=True
     )

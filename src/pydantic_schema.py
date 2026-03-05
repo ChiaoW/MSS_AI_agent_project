@@ -306,7 +306,7 @@ class Stage2Inference(BaseModel):
                **MUST** look at the 'HISTORICAL REFERENCE CASES' to find the specific recipe used for this customer/macro (e.g., 'ALD(W2 35cycle)', 'Pi bond(60/30)', or 'M-bond(60/30)') and apply it to the current sample.
 
             [Output Format]
-            Combine steps with '+': "Top view+ALD(W2-A)+DB+Pi bond(60/30)+Probing"
+            Combine steps with '+': "Top view+ALD(W2-A)+DB+Pi bond(60/30)+Probing+TEM
         """
     )
     loctestkey: Optional[str] = Field(
