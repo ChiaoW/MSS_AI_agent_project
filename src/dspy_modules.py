@@ -38,6 +38,7 @@ class Stage1Signature(dspy.Signature):
     2. LEARNING FROM HISTORY: Look at the provided historical examples to understand what a valid 'Wafer ID' looks like. DO NOT extract Wafer IDs from the historical cases.
     3. ANTI-LOOP CRITICAL: DO NOT duplicate Wafer IDs.
     4. FALLBACK ID: If there is no standard Wafer ID code, but there is a generic description (e.g., "Wafer 1"), extract that as the Wafer ID so the process can continue.
+    5. BRIEF REASONING: Keep your reasoning strictly under 50 words. Do not over-explain.
     """
     input_text: str = dspy.InputField(desc="The complete text of the original case (Target Case)")
     historical_examples: str = dspy.InputField(desc="Historical reference cases from the database (please refer to their format, but do not extract the IDs).")
@@ -65,7 +66,7 @@ class SemiconductorExtractor(dspy.Module):
         # 使用 ChainOfThought 來強制模型輸出 Pydantic 結構，並加上思考過程
         self.stage1 = dspy.ChainOfThought(Stage1Signature)
         self.stage2 = dspy.ChainOfThought(Stage2Signature)
-        self.retriever = dspy.Retrieve(k=3)
+        # self.retriever = dspy.Retrieve(k=3)
 
         self.latest_input = ""
         self.latest_context = ""
@@ -75,12 +76,14 @@ class SemiconductorExtractor(dspy.Module):
         self.latest_context = "尚未檢索 (Retrieval Failed)"
 
         # --- 步驟 1: RAG 檢索 ---
+        retriever = dspy.Retrieve(k=3)
         search_query = input_text
-        search_results = self.retriever(search_query)
+        search_results = retriever(search_query)
         
         historical_context = ""
         for idx, passage in enumerate(search_results.passages):
-            historical_context += f"=== HISTORICAL CASE #{idx+1} ===\n{passage}\n\n"
+            truncated_passage = str(passage)[:1500]
+            historical_context += f"=== HISTORICAL CASE #{idx+1} ===\n{truncated_passage}\n\n"
 
         self.latest_context = historical_context
 
@@ -95,7 +98,7 @@ class SemiconductorExtractor(dspy.Module):
         
         if s1_output is None:
             print("  [Critical] Stage 1 預測結果中找不到 'output' 屬性。")
-            dspy.inspect_history(n=1)
+            # dspy.inspect_history(n=1)
             return None
 
         # 檢查 DSPy 是否有成功將輸出解析為 Pydantic (Stage1Order)
@@ -128,11 +131,11 @@ class SemiconductorExtractor(dspy.Module):
                     print("  [Success] 手動 JSON 清理與解析成功！")
                 except Exception as e:
                     print(f"  [Critical] 手動 JSON 解析失敗: {e}")
-                    dspy.inspect_history(n=1)
+                    # dspy.inspect_history(n=1)
                     return None
             else:
                 print("  [Critical] 找不到有效的 JSON 結構。印出原始模型輸出：")
-                dspy.inspect_history(n=1)
+                # dspy.inspect_history(n=1)
                 return None
 
         # 如果連一個 sample 都沒抓到，提早結束
@@ -159,7 +162,11 @@ class SemiconductorExtractor(dspy.Module):
                 
                 s2_output = getattr(s2_pred, "output", None)
                 
-                extracted_reasoning = getattr(s2_pred, "reasoning", "No reasoning generated.")
+                extracted_reasoning = getattr(s2_pred, "reasoning", "")
+                if extracted_reasoning is None:
+                    extracted_reasoning = "Token limit exceeded or no reasoning generated."
+                else:
+                    extracted_reasoning = str(extracted_reasoning)
                 
                 if isinstance(s2_output, Stage2Inference):
                     route = s2_output.route

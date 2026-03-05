@@ -21,20 +21,20 @@ llm = dspy.LM(
     model=MODEL_NAME,
     api_base=LLM_API_BASE,
     api_key="EMPTY",  
-    temperature=0.1,  
-    max_tokens=8192,
+    temperature=0,  
+    max_tokens=4096,
     cache=False
 )
 
 # 註冊我們客製化的 Retriever
-my_retriever = CustomMssRM(db_path=DB_URL, k=3)
+my_retriever = CustomMssRM(db_url=DB_URL, k=3)
 dspy.settings.configure(lm=llm, rm=my_retriever)
 
 
 # ==========================================
 # 4. 主程式執行區塊 (讀檔與批次處理)
 # ==========================================
-def truncate_text(text: str, max_chars: int = 40000) -> str:
+def truncate_text(text: str, max_chars: int = 20000) -> str:
     if len(text) <= max_chars:
         return text
     print('Text Truncated')
@@ -54,6 +54,10 @@ def process_lot_request(lot_directory: str):
 
     # 實例化我們的 DSPy 模組
     extractor = SemiconductorExtractor()
+
+    optimized_model_path = "data/output/optimized_extractor.json"
+    if os.path.exists(optimized_model_path):
+        extractor.load(optimized_model_path)
     
     try:
         prediction = extractor(input_text=input_text, lot_base_name=lot_base_name)

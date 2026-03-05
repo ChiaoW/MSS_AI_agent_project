@@ -88,3 +88,7 @@ target/
 # IPython
 profile_default/
 ipython_config.py
+
+# Logs
+logs/
+*.log

@@ -1,5 +1,49 @@
+import re
 import json
 import dspy
+import logging
+
+def normalize_text(text):
+    """基礎的字串常規化：轉小寫、去除多餘空白"""
+    if text is None or str(text).lower() == "nan":
+        return ""
+    return str(text).lower().strip()
+
+def normalize_prepare_steps(prepare_str):
+    """
+    針對 prepare 欄位進行深度常規化
+    1. 轉小寫
+    2. 以 '+' 切割步驟，並自動吸收 '+' 前後的任何空白
+    3. 針對特定同義詞進行統一替換
+    4. 回傳 Set (無序集合)，以忽略步驟先後順序的差異
+    """
+    if not prepare_str:
+        return set()
+        
+    # 統一轉小寫，並使用正規表達式以 '+' 切割，同時移除多餘空白
+    raw_steps = re.split(r'\s*\+\s*', normalize_text(prepare_str))
+    
+    normalized_steps = set()
+    for step in raw_steps:
+        if not step:
+            continue
+            
+        # 規則 A: 處理 DB 定位相關同義詞
+        if step in ["db positioning", "positioning", "db-positioning"]:
+            step = "db"
+            
+        # 規則 B: 處理 M-bond 溫度與時間變體 
+        # 捕捉包含 m-bond 且帶有 60 與 30 數字的任何寫法
+        elif "m-bond" in step and "60" in step and "30" in step:
+            step = "m-bond(60/30)"
+            
+        # 規則 C: 處理 Pi-bond 溫度與時間變體
+        elif "pi-bond" in step and "60" in step and "30" in step:
+            step = "pi-bond(60/30)"
+            
+        normalized_steps.add(step)
+        
+    return normalized_steps
 
 def extraction_metric(example, pred, trace=None):
     if pred is None or pred.final_order is None:
@@ -11,11 +55,14 @@ def extraction_metric(example, pred, trace=None):
     if not predicted_samples:
         return 0.0
         
-    # 將預測結果轉為容易比對的格式
     pred_dict = {s.wafer_id: s for s in predicted_samples}
     
     score = 0.0
-    total_attributes = len(expected_samples) * 4 # 每個 sample 評估 4 個欄位
+    total_attributes = len(expected_samples) * 4 # 每個 sample 評估 wafer_id, route, prepare, loctestkey
+
+    logger = logging.getLogger("metric_logger")
+    
+    logger.info(f"\n[Metric Debug] 評估 Lot: {example.lot_base_name}")
     
     for exp_s in expected_samples:
         wafer_id = exp_s["wafer_id"]
@@ -23,16 +70,32 @@ def extraction_metric(example, pred, trace=None):
             score += 1.0 # Wafer ID 命中
             
             p_sample = pred_dict[wafer_id]
-            # 寬鬆比對或精確比對
-            if str(p_sample.route).strip() == str(exp_s.get("route")).strip():
+            p_route = normalize_text(p_sample.route)
+            e_route = normalize_text(exp_s.get("route"))
+            p_prepare = normalize_prepare_steps(p_sample.prepare)
+            e_prepare = normalize_prepare_steps(exp_s.get("prepare"))
+            p_loc = normalize_text(p_sample.loctestkey)
+            e_loc = normalize_text(exp_s.get("loctestkey"))
+            
+            # [修改] 使用 logger.info 紀錄比對細節
+            logger.info(f"  -> Wafer: {wafer_id}")
+            logger.info(f"     [Route]   預測: {p_route:<20} | 答案: {e_route}")
+            logger.info(f"     [Prepare] 預測: {str(p_prepare):<20} | 答案: {str(e_prepare)}")
+            logger.info(f"     [LocTest] 預測: {p_loc:<20} | 答案: {e_loc}")
+            
+            if p_route == e_route:
                 score += 1.0
-            if str(p_sample.prepare).strip() == str(exp_s.get("prepare")).strip():
+            if p_prepare == e_prepare:
                 score += 1.0
-            if str(p_sample.loctestkey).strip() == str(exp_s.get("loctestkey")).strip():
+            if p_loc == e_loc:
                 score += 1.0
+        else:
+            logger.info(f"  -> Wafer: {wafer_id} [未命中/漏抓]")
                 
-    # 回傳 0 到 1 之間的分數
-    return score / total_attributes if total_attributes > 0 else 0.0
+    final_score = score / total_attributes if total_attributes > 0 else 0.0
+    logger.info(f"  => 此 Lot 得分: {final_score:.2f}")
+    
+    return final_score
 
 def load_dspy_dataset(ground_truth_path, raw_data_dir):
     with open(ground_truth_path, 'r', encoding='utf-8') as f:
@@ -47,7 +110,7 @@ def load_dspy_dataset(ground_truth_path, raw_data_dir):
         case_dir = f"{raw_data_dir}/{lot_id}"
         try:
             full_text = processor.process_directory(case_dir)
-            input_text = full_text[:40000] # 依照你原本的截斷邏輯
+            input_text = full_text[:20000] # 依照你原本的截斷邏輯
         except Exception:
             continue # 如果找不到檔案則跳過
             
@@ -64,8 +127,3 @@ def load_dspy_dataset(ground_truth_path, raw_data_dir):
         dataset.append(example)
         
     return dataset
-
-# 將資料切分為 Train 與 Dev
-dataset = load_dspy_dataset("data/reference/ground_truth/ground_truth.json", "data/raw/all_cases")
-trainset = dataset[:15]
-devset = dataset[15:]
