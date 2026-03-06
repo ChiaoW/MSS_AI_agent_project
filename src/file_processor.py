@@ -13,7 +13,11 @@ from PIL import Image
 import io
 import base64
 import requests
+import logging
+from datetime import datetime
 from pdf2image import convert_from_path
+
+logger = logging.getLogger(__name__)
 
 class UniversalFileProcessor:
     def __init__(self, temp_dir_base=None, 
@@ -34,7 +38,7 @@ class UniversalFileProcessor:
                 if file_path.name.startswith("~") or file_path.name.startswith("."):
                     continue
                 
-                print(f"Processing: {file_path.name}...")
+                logger.info(f"Processing: {file_path.name}")
                 file_content = self._dispatch_file_handler(file_path)
 
                 if file_content:
@@ -81,18 +85,18 @@ class UniversalFileProcessor:
         """
         text_content = []
         try:
-            print(f"   -> Converting PDF to images (this might take a few seconds)...")
+            logger.debug(f"Converting PDF to images (this might take a few seconds)")
             # 將 PDF 轉為圖片。dpi=200 是一個很好的平衡點 (解析度夠看清楚小字，且檔案不會太大導致 OOM)
             images = convert_from_path(str(path), dpi=200)
             total_pages = len(images)
             
             for i, img in enumerate(images):
-                print(f"   -> [olmOCR] Processing page {i+1}/{total_pages}...")
+                logger.info(f"[olmOCR] Processing page {i+1}/{total_pages}")
                 vlm_text = self._call_olmocr_api(img)
                 text_content.append(f"\n--- [Page {i+1}] ---\n{vlm_text}\n")
                 
         except Exception as e:
-            print(f"   [PDF to Image Error]: {e}")
+            logger.error(f"PDF to Image Error]: {e}")
             return ""
 
         return "\n".join(text_content)
@@ -163,7 +167,7 @@ class UniversalFileProcessor:
         text = re.sub(mss_pattern, "", text, flags=re.DOTALL | re.IGNORECASE)
         
         def html_table_to_markdown(match):
-            print('[DEBUG] Enter table to markdown.')
+            logger.debug('Enter table to markdown.')
             html_content = match.group(0)
             try:
                 # 使用 pandas 讀取 HTML 表格字串
@@ -174,7 +178,7 @@ class UniversalFileProcessor:
                     return df.to_markdown(index=False, tablefmt="pipe")
             except Exception as e:
                 # 若解析失敗，則保留原樣以避免遺失資料
-                print(f'[DEBUG] Fail to turn to markdown, {e}')
+                logger.warning(f'Fail to turn to markdown, {e}')
                 return html_content
             return html_content
 
@@ -301,33 +305,31 @@ if __name__ == "__main__":
     # 確保輸出資料夾存在，若不存在則建立
     os.makedirs(output_dir, exist_ok=True)
     
-    print(f"Starting batch processing for {len(TARGET_LOT_IDS)} lots...\n")
+    logger.info(f"Starting batch processing for {len(TARGET_LOT_IDS)} lots...\n")
 
     for lot_id in TARGET_LOT_IDS:
         # 組合該 Lot 的完整路徑 (例如: ./all_cases/T25090401)
         lot_path = os.path.join(base_input_dir, lot_id)
         
-        print(f"--- Processing Lot: {lot_id} ---")
+        logger.info(f"--- Processing Lot: {lot_id} ---")
         
         if os.path.exists(lot_path):
             # 執行目錄處理
             result_text = processor.process_directory(lot_path)
             
             # 印出前 500 字供快速檢查 (避免字數過多洗版)
-            print(f"Preview (First 500 chars):\n{result_text[:500]}\n...")
+            logger.info(f"Preview (First 500 chars):\n{result_text[:500]}\n...")
             
             # 儲存成獨立的 debug 文字檔
             output_filename = os.path.join(output_dir, f"{lot_id}.txt")
             try:
                 with open(output_filename, "w", encoding="utf-8") as f:
                     f.write(result_text)
-                print(f"-> Successfully saved to: {output_filename}")
+                logger.info(f"-> Successfully saved to: {output_filename}")
             except Exception as e:
-                print(f"-> Error saving file {output_filename}: {e}")
+                logger.error(f"-> Error saving file {output_filename}: {e}")
                 
         else:
-            print(f"-> Path not found: {lot_path}")
-        
-        print("") # 每個 Lot 處理完後換行分隔
+            logger.warning(f"-> Path not found: {lot_path}")
     
-    print("Batch processing completed.")
+    logger.info("Batch processing completed.")

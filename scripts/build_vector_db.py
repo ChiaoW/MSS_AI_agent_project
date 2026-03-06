@@ -1,6 +1,8 @@
 import json
 import os
+import logging
 import torch
+from datetime import datetime
 from typing import List, Dict
 from langchain_community.vectorstores import Qdrant
 from langchain_qdrant import QdrantVectorStore
@@ -18,6 +20,18 @@ from langchain_openai import OpenAIEmbeddings
 
 from src.file_processor import UniversalFileProcessor
 
+# 設定 Logging
+os.makedirs("data/output/logs", exist_ok=True)
+log_filename = datetime.now().strftime("data/output/logs/build_vector_db_%Y%m%d_%H%M%S.log")
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[
+        logging.FileHandler(log_filename, encoding='utf-8'),
+        logging.StreamHandler()
+    ]
+)
+
 # 設定路徑
 GT_JSON_PATH = "data/reference/ground_truth/ground_truth_with_wafer_id_processed.json"
 CASES_DIR = "data/raw/all_cases_in_ground_truth"
@@ -29,13 +43,13 @@ def load_ground_truth_data(json_path: str) -> Dict:
         return json.load(f)
 
 def build_database():
-    print("Step 1: Loading Ground Truth Data...")
+    logging.info("Step 1: Loading Ground Truth Data...")
     gt_data = load_ground_truth_data(GT_JSON_PATH)
     
     documents = []
     processor = UniversalFileProcessor()
     
-    print("Step 2: Processing Raw Files for Knowledge Base...")
+    logging.info("Step 2: Processing Raw Files for Knowledge Base...")
     # gt_data 是個 Dict，Key 是 Lot ID (e.g., "T25111801")
     for lot_id, data in gt_data.items():
         lot_path = os.path.join(CASES_DIR, lot_id)
@@ -44,7 +58,7 @@ def build_database():
         if os.path.exists(lot_path):
             raw_text = processor.process_directory(lot_path)
         else:
-            print(f"Warning: Raw files for {lot_id} not found at {lot_path}. Using placeholder.")
+            logging.warning(f"Raw files for {lot_id} not found at {lot_path}. Using placeholder.")
             # 為了讓程式能跑，若無檔案則生成合成文字 (實際運作請確保檔案存在)
             raw_text = f"Simulated email content for Lot {lot_id}. Customer requests analysis for {len(data['samples'])} wafers."
 
@@ -74,7 +88,7 @@ def build_database():
         )
         documents.append(doc)
 
-    print(f"Step 3: Ingesting {len(documents)} documents into Qdrant...")
+    logging.info(f"Step 3: Ingesting {len(documents)} documents into Qdrant...")
 
     embeddings = FastEmbedEmbeddings(model_name="nomic-ai/nomic-embed-text-v1.5")
     sparse_embeddings = FastEmbedSparse(model_name="Qdrant/bm25")
@@ -87,7 +101,7 @@ def build_database():
             force_recreate=True
     )
         
-    print("SUCCESS: Vector Database built successfully!")
+    logging.info("SUCCESS: Vector Database built successfully!")
 
 if __name__ == "__main__":
     build_database()

@@ -7,7 +7,7 @@ import dspy
 from src.rag_retriever import DynamicFewShotRetriever
 from src.pydantic_schema import OrderInfo, SampleInfo, Stage1Order, Stage2Inference, Stage1Sample
 
-logger = logging.getLogger("dspy_pipeline")
+logger = logging.getLogger(__name__)
 
 class CustomMssRM(dspy.Retrieve):
     def __init__(self, db_url: str, k: int = 3):

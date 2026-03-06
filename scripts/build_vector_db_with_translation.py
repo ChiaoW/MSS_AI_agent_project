@@ -1,6 +1,8 @@
 import json
 import os
 import re
+import logging
+from datetime import datetime
 from typing import List, Dict
 from tqdm import tqdm  # 如果沒安裝，請 pip install tqdm
 
@@ -18,9 +20,17 @@ from langchain_core.prompts import ChatPromptTemplate
 # 自定義模組
 from src.file_processor import UniversalFileProcessor
 
-# ==========================================
-# Config
-# ==========================================
+os.makedirs("data/output/logs", exist_ok=True)
+log_filename = datetime.now().strftime("data/output/logs/build_vector_db_with_translation_%Y%m%d_%H%M%S.log")
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[
+        logging.FileHandler(log_filename, encoding='utf-8'),
+        logging.StreamHandler()
+    ]
+)
+
 GT_JSON_PATH = "data/reference/ground_truth/Kang_Yi_Lin_case_ground_truth_translated.json"
 CASES_DIR = "data/raw/Kang_Yi_Lin_Merged"
 DB_URL = "http://localhost:6333"
@@ -31,9 +41,6 @@ CACHE_FILE = "data/output/translation_cache.json"  # 用來存翻譯過的文字
 LLM_API_BASE = "http://localhost:8000/v1"
 MODEL_NAME = "openai/gpt-oss-20b"
 
-# ==========================================
-# Helper: Translation / Rewriting Agent
-# ==========================================
 class EngineeringRewriter:
     def __init__(self):
         self.llm = ChatOpenAI(
@@ -69,7 +76,7 @@ class EngineeringRewriter:
         if not self.contains_chinese(text):
             return text
 
-        print(f"  [Rewriting] Detected Chinese/Non-standard English in {lot_id}. Calling LLM...")
+        logging.info(f"  [Rewriting] Detected Chinese/Non-standard English in {lot_id}. Calling LLM...")
 
         # 3. 定義 Rewrite Prompt
         system_prompt = (
@@ -107,7 +114,7 @@ class EngineeringRewriter:
             
             return rewritten_text
         except Exception as e:
-            print(f"  [Error] Translation failed: {e}. Using original text.")
+            logging.error(f"Translation failed: {e}. Using original text.")
             return text
 
 # ==========================================
@@ -118,9 +125,9 @@ def load_ground_truth_data(json_path: str) -> Dict:
         return json.load(f)
 
 def build_database_with_rewrite():
-    print("Step 1: Loading Ground Truth Data...")
+    logging.info("Step 1: Loading Ground Truth Data...")
     if not os.path.exists(GT_JSON_PATH):
-        print(f"Error: {GT_JSON_PATH} not found.")
+        logging.error(f"{GT_JSON_PATH} not found.")
         return
 
     gt_data = load_ground_truth_data(GT_JSON_PATH)
@@ -129,7 +136,7 @@ def build_database_with_rewrite():
     processor = UniversalFileProcessor()
     rewriter = EngineeringRewriter()
     
-    print("Step 2: Processing & Rewriting Files for Knowledge Base...")
+    logging.info("Step 2: Processing & Rewriting Files for Knowledge Base...")
     
     # 使用 tqdm 顯示進度條
     for lot_id, data in tqdm(gt_data.items(), desc="Processing Lots"):
@@ -142,9 +149,9 @@ def build_database_with_rewrite():
             # Placeholder
             raw_text = f"Simonulated content for {lot_id}. No files found."
 
-        print(f"\n  -> [Debug] {lot_id} 原始讀取字數: {len(raw_text)}")
+        logging.debug(f"\n{lot_id} 原始讀取字數: {len(raw_text)}")
         if len(raw_text.strip()) == 0:
-            print(f"  -> [Warning] {lot_path} 讀出來完全沒字！")
+            logging.warning(f"  ->{lot_path} 讀出來完全沒字！")
 
         # 2. AI 改寫/翻譯
         # final_text = rewriter.rewrite_to_american_english(raw_text, lot_id)
@@ -175,7 +182,7 @@ def build_database_with_rewrite():
         )
         documents.append(doc)
 
-    print(f"\nStep 3: Ingesting {len(documents)} documents into Qdrant...")
+    logging.info(f"\nStep 3: Ingesting {len(documents)} documents into Qdrant...")
 
     embeddings = FastEmbedEmbeddings(model_name="nomic-ai/nomic-embed-text-v1.5")
     sparse_embeddings = FastEmbedSparse(model_name="Qdrant/bm25")
@@ -187,7 +194,7 @@ def build_database_with_rewrite():
     # B. 設定小批次處理 (Batch Size)
     BATCH_SIZE = 2 # 每次只算 2 筆，絕對不會 OOM
     
-    print(f"開始分批寫入，每次 {BATCH_SIZE} 筆...")
+    logging.info(f"開始分批寫入，每次 {BATCH_SIZE} 筆...")
     
     # 處理第一批 (順便建立並覆蓋資料庫 force_recreate=True)
     first_batch = documents[:BATCH_SIZE]
@@ -199,15 +206,15 @@ def build_database_with_rewrite():
         collection_name=COLLECTION_NAME,
         force_recreate=True
     )
-    print(f"  -> Batch 1/{len(documents)//BATCH_SIZE + 1} completed.")
+    logging.info(f"  -> Batch 1/{len(documents)//BATCH_SIZE + 1} completed.")
 
     # 處理後續批次 (用 add_documents 加入，不要再 force_recreate)
     for i in range(BATCH_SIZE, len(documents), BATCH_SIZE):
         batch = documents[i : i + BATCH_SIZE]
         vector_store.add_documents(batch)
-        print(f"  -> Batch {i//BATCH_SIZE + 1}/{len(documents)//BATCH_SIZE + 1} completed.")
+        logging.info(f"  -> Batch {i//BATCH_SIZE + 1}/{len(documents)//BATCH_SIZE + 1} completed.")
     
-    print(f"SUCCESS: Vector Database built at {DB_URL}/{COLLECTION_NAME} with English-Rewritten content!")
+    logging.info(f"SUCCESS: Vector Database built at {DB_URL}/{COLLECTION_NAME} with English-Rewritten content!")
 
 if __name__ == "__main__":
     build_database_with_rewrite()
