@@ -1,10 +1,13 @@
 import os
 import json
 from datetime import datetime
+import logging
 import dspy
 
 from src.rag_retriever import DynamicFewShotRetriever
 from src.pydantic_schema import OrderInfo, SampleInfo, Stage1Order, Stage2Inference, Stage1Sample
+
+logger = logging.getLogger("dspy_pipeline")
 
 class CustomMssRM(dspy.Retrieve):
     def __init__(self, db_url: str, k: int = 3):
@@ -88,7 +91,7 @@ class SemiconductorExtractor(dspy.Module):
         self.latest_context = historical_context
 
         # --- 步驟 2: 階段一 (實體切分) ---
-        print("\n[DSPy] Stage 1: Entity Extraction...")
+        logger.info("\n[DSPy] Stage 1: Entity Extraction...")
         s1_pred = self.stage1(
             input_text=input_text, 
             historical_examples=historical_context
@@ -97,24 +100,25 @@ class SemiconductorExtractor(dspy.Module):
         s1_output = getattr(s1_pred, "output", None)
         
         if s1_output is None:
-            print("  [Critical] Stage 1 預測結果中找不到 'output' 屬性。")
+            logger.error("  [Critical] Stage 1 預測結果中找不到 'output' 屬性。")
             # dspy.inspect_history(n=1)
             return None
 
         # 檢查 DSPy 是否有成功將輸出解析為 Pydantic (Stage1Order)
         if isinstance(s1_output, Stage1Order):
-            print("  [Success] DSPy 成功自動解析為 Stage1Order Pydantic 物件！")
+            logger.info("  [Success] DSPy 成功自動解析為 Stage1Order Pydantic 物件！")
             stage1_samples = s1_output.samples
             global_analysis = s1_output.global_analysis
             company = s1_output.company
             customer_name = s1_output.customer_name
         else:
-            print(f"  [Warning] DSPy 自動 Pydantic 解析失敗 (抓到 {type(s1_output)})。啟動手動清理與 fallback...")
-            # 攔截被 <think> 標籤干擾的原始文字
+            logger.warning(f"  [Warning] DSPy 自動 Pydantic 解析失敗 (抓到 {type(s1_output)})。啟動手動清理與 fallback...")
+
             raw_text = str(s1_output)
+            logger.debug(f"原始 Stage 1 輸出: {raw_text}")
             
             import re, json
-            cleaned = re.sub(r"<think>.*?</think>", "", raw_text, flags=re.DOTALL | re.IGNORECASE)
+            cleaned = re.sub(r"<tool_call>.*?<tool_call>", "", raw_text, flags=re.DOTALL | re.IGNORECASE)
             cleaned = re.sub(r"```json\s*", "", cleaned, flags=re.IGNORECASE)
             cleaned = re.sub(r"```", "", cleaned)
             
@@ -128,29 +132,30 @@ class SemiconductorExtractor(dspy.Module):
                     global_analysis = parsed_dict.get("global_analysis", "")
                     company = parsed_dict.get("company", "")
                     customer_name = parsed_dict.get("customer_name", "")
-                    print("  [Success] 手動 JSON 清理與解析成功！")
+                    logger.info("  [Success] 手動 JSON 清理與解析成功！")
                 except Exception as e:
-                    print(f"  [Critical] 手動 JSON 解析失敗: {e}")
+                    logger.error(f"  [Critical] 手動 JSON 解析失敗: {e}")
                     # dspy.inspect_history(n=1)
                     return None
             else:
-                print("  [Critical] 找不到有效的 JSON 結構。印出原始模型輸出：")
+                logger.error("  [Critical] 找不到有效的 JSON 結構。印出原始模型輸出：")
+                logger.debug(f"原始模型輸出: {raw_text}")
                 # dspy.inspect_history(n=1)
                 return None
 
         # 如果連一個 sample 都沒抓到，提早結束
         if not stage1_samples:
-             print("  [Critical] 擷取到的 samples 列表為空。")
+             logger.error("  [Critical] 擷取到的 samples 列表為空。")
              return None
 
         # --- 步驟 3: 階段二 (單一樣本推論) ---
-        print("\n[DSPy] Stage 2: Logic Inference...")
+        logger.info("\n[DSPy] Stage 2: Logic Inference...")
         final_samples = []
         for idx, raw_sample in enumerate(stage1_samples):
             if not raw_sample.wafer_id:
                 continue
                 
-            print(f"  -> Inferring parameters for Wafer ID: {raw_sample.wafer_id}")
+            logger.info(f"  -> Inferring parameters for Wafer ID: {raw_sample.wafer_id}")
             suffix = f"{idx + 1:03d}"
 
             try:
@@ -173,11 +178,30 @@ class SemiconductorExtractor(dspy.Module):
                     prepare = s2_output.prepare
                     loctestkey = s2_output.loctestkey
                 else:
-                    print(f"  [Warning] Wafer {raw_sample.wafer_id} 解析 Pydantic 失敗。Fallback to raw string.")
-                    route, prepare, loctestkey = None, None, None
+                    logger.warning(f"  [Warning] Wafer {raw_sample.wafer_id} 解析 Pydantic 失敗。啟動手動 JSON 清理...")
+                    raw_text2 = str(s2_output)
+                    cleaned2 = re.sub(r"<think>.*?</think>", "", raw_text2, flags=re.DOTALL | re.IGNORECASE)
+                    cleaned2 = re.sub(r"```json\s*", "", cleaned2, flags=re.IGNORECASE)
+                    cleaned2 = re.sub(r"```", "", cleaned2)
+                    
+                    start_idx = cleaned2.find('{')
+                    end_idx = cleaned2.rfind('}')
+                    if start_idx != -1 and end_idx != -1:
+                        try:
+                            parsed_dict = json.loads(cleaned2[start_idx : end_idx + 1])
+                            route = parsed_dict.get("route")
+                            prepare = parsed_dict.get("prepare")
+                            loctestkey = parsed_dict.get("loctestkey")
+                            logger.info(f"  [Success] Wafer {raw_sample.wafer_id} 手動 JSON 解析成功！")
+                        except Exception as e:
+                            logger.error(f"  [Critical] Wafer {raw_sample.wafer_id} 手動 JSON 解析失敗: {e}")
+                            route, prepare, loctestkey = None, None, None
+                    else:
+                        logger.error(f"  [Critical] Wafer {raw_sample.wafer_id} 找不到有效的 JSON 結構。")
+                        route, prepare, loctestkey = None, None, None
             
             except Exception as e:
-                print(f"  [Critical] Wafer {raw_sample.wafer_id} 推論崩潰: {e}")
+                logger.error(f"  [Critical] Wafer {raw_sample.wafer_id} 推論崩潰: {e}")
                 route, prepare, loctestkey = "Error", "Error", "Error"
                 extracted_reasoning = f"Error occurred: {str(e)}"
 
@@ -253,5 +277,5 @@ def save_debug_prompt(lot_id: str, llm_instance, input_text: str, historical_con
                 f.write(str(response_obj) + "\n")
             f.write("\n\n")
             
-    print(f"  [Debug] 實際對話紀錄已儲存至: {filename}")
+    logger.info(f"  [Debug] 實際對話紀錄已儲存至: {filename}")
     llm_instance.history.clear()
