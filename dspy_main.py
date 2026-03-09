@@ -91,8 +91,8 @@ def process_lot_request(lot_directory: str):
 if __name__ == "__main__":
     # 測試用的案例資料夾
     cases = [
-        "data/raw/all_cases/T26030201"
-        # "data/raw/Kang_Yi_Lin_Merged/T25082545",
+        # "data/raw/all_cases/T25100101"
+        "data/raw/Kang_Yi_Lin_Merged/T251020101",
     ]
 
     results = []

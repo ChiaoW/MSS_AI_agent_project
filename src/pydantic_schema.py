@@ -118,28 +118,23 @@ class SampleInfo(BaseModel):
         }
     )
 
-    # @field_validator('route', mode='before')
-    # @classmethod
-    # def fuzzy_match_route(cls, v):
-    #     if not v:
-    #         return v
+    @field_validator('route', mode='before')
+    @classmethod
+    def relaxed_match_route(cls, v: Optional[str]) -> Optional[str]:
+        if not v:
+            return v
         
-    #     input_str = str(v).strip()
-    #     valid_options = active_routes
-
-    #     if input_str in valid_options:
-    #         return input_str
-
-    #     for option in valid_options:
-    #         if input_str.lower() == option.lower():
-    #             return option
-                
-    #     # Lower cutoff to 0.6 to be more forgiving, and return the raw string if it fails instead of crashing
-    #     matches = difflib.get_close_matches(input_str, valid_options, n=1, cutoff=0.6)
-    #     if matches:
-    #         return matches[0]
-
-    #     return input_str
+        # 1. 轉字串、去除首尾空白、轉小寫
+        input_str = re.sub(r'\s+', ' ', str(v)).strip().lower()
+        
+        # 2. 建立一個小寫對應原始格式的字典，方便快速查找
+        # active_routes 已經在檔案頂端被讀取並定義
+        route_mapping = {re.sub(r'\s+', ' ', r).strip().lower(): r for r in active_routes}
+        
+        # 3. 如果在 mapping 中找到，回傳原始正確大小寫的 Route 名稱
+        if input_str in route_mapping:
+            return route_mapping[input_str]
+        raise ValueError(f"Invalid route: '{v}'. You MUST output exactly one of the valid route names from the provided list.")
     
     prepare: Optional[str] = Field(
         default=None,
@@ -190,7 +185,11 @@ class Stage1Sample(BaseModel):
 class Stage1Order(BaseModel):
     """階段一專用：僅抽取全局資訊與實體切分"""
     global_analysis: str = Field(
-        description="Explicitly state exactly how many Wafer IDs/Samples are present in the text."
+        description=(
+            "Execute a Deep Logic Analysis step before extraction:"
+            "\n1. **Count Samples:** Explicitly scan the text and tables in the <target_case> and state EXACTLY how many Wafer IDs/Samples are present."
+            "\n2. **List all Samples:** Identify each unique sample or Wafer ID present in the 'CURRENT TARGET CASE'."
+        )
     )
     company: Optional[str] = Field(
         default=None,
@@ -267,17 +266,15 @@ class Stage1Order(BaseModel):
 
 class Stage2Inference(BaseModel):
     """階段二專用：針對單一樣本進行邏輯推論"""
-    # thought_process: str = Field(
-    #     description=(
-    #         "Execute a Deep Logic Analysis step before extraction:"
-    #         "\n1. **Map Specific Instructions (CRITICAL):** For EACH sample, explicitly state what the text or PPT requested. "
-    #         "\n2. **Do Not Generalize:** Pay close attention to row-specific or item-specific notes. "
-    #         "DO NOT assume all samples share the same prep or route conditions unless explicitly stated as 'applies to all'."
-    #         "\n3. **Infer Hidden Steps (Domain Knowledge):**"
-    #         "   - 'Easy-Lift' / 'Nano-probing' implies Route='Probing'."
-    #         "   - 'Epoxy' or 'Glue' implies Prepare='M-bond'."
-    #     )
-    # )
+    thought_process: str = Field(
+        description=(
+            "Execute a Deep Logic Analysis step before extraction:"
+            "\n1. **Map Specific Instructions (CRITICAL):** For EACH sample, explicitly state what the input requested. "
+            "\n2. **Infer Hidden Steps (Domain Knowledge):**"
+            "   - 'Easy-Lift' / 'Nano-probing' implies Route='Probing'."
+            "   - 'Epoxy' or 'Glue' implies Prepare='M-bond'."
+        )
+    )
     route: Optional[str] = Field(
         default=None,
         description=(
@@ -357,6 +354,24 @@ class Stage2Inference(BaseModel):
         v = re.sub(r'\s*\(.*?\)', '', v)
         v = v.strip(' |-,')
         return v.strip()
+    
+    @field_validator('route', mode='before')
+    @classmethod
+    def relaxed_match_route(cls, v: Optional[str]) -> Optional[str]:
+        if not v:
+            return v
+        
+        # 1. 轉字串、去除首尾空白、轉小寫
+        input_str = re.sub(r'\s+', ' ', str(v)).strip().lower()
+        
+        # 2. 建立一個小寫對應原始格式的字典，方便快速查找
+        # active_routes 已經在檔案頂端被讀取並定義
+        route_mapping = {re.sub(r'\s+', ' ', r).strip().lower(): r for r in active_routes}
+        
+        # 3. 如果在 mapping 中找到，回傳原始正確大小寫的 Route 名稱
+        if input_str in route_mapping:
+            return route_mapping[input_str]
+        raise ValueError(f"Invalid route: '{v}'. You MUST output exactly one of the valid route names from the provided list.")
     
 
 class OrderInfo(BaseModel):

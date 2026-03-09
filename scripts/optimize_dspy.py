@@ -1,6 +1,7 @@
 import os
 import dspy
 import random
+import json
 import pickle
 import logging
 from datetime import datetime
@@ -110,8 +111,8 @@ def main():
     logging.info("\n=== 開始編譯與優化模型 (Optimizer) ===")
     optimizer = BootstrapFewShot(
         metric=extraction_metric,
-        max_bootstrapped_demos=3, # 將表現最好的 3 個成功軌跡加入 Prompt
-        max_labeled_demos=0       # 不直接使用訓練集原始資料，確保只用模型自己生成的成功軌跡
+        max_bootstrapped_demos=2,
+        max_labeled_demos=1
     )
 
     # Compile 會花費較多時間，因為它會逐一執行 trainset 並用 metric 驗證
@@ -119,6 +120,7 @@ def main():
         student=uncompiled_extractor,
         trainset=trainset
     )
+    compiled_extractor.save("data/output/dspy/compiled_mss_extractor.json")
 
     # 5. 測試 Compiled (已優化)
     logging.info("\n=== 測試優化後的模型 (Compiled) ===")
@@ -132,6 +134,47 @@ def main():
     
     compiled_extractor.save(save_path)
     logging.info(f"\n編譯完成！優化後的模型已儲存至: {save_path}")
+
+    logging.info("\n=== 顯示最後 3 次 LLM 互動歷史於終端機 ===")
+    llm.inspect_history(n=3)
+
+    history_out_dir = "data/output/debug_prompt"
+    os.makedirs(history_out_dir, exist_ok=True)
+    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+    history_file = f"{history_out_dir}/optimizer_history_{ts}.txt"
+
+    with open(history_file, "w", encoding="utf-8") as f:
+        f.write("=== Optimizer Training LLM History ===\n")
+        f.write(f"Total LLM Calls during Optimization: {len(llm.history)}\n\n")
+        
+        for i, interaction in enumerate(llm.history):
+            f.write(f"\n{'='*20} LLM CALL #{i+1} {'='*20}\n")
+            
+            # 寫入傳送給 LLM 的 Prompt
+            f.write(">>> EXACT PROMPT SENT TO LLM:\n")
+            prompt = interaction.get('prompt')
+            if prompt is None:
+                kwargs = interaction.get('kwargs', {})
+                messages = kwargs.get('messages')
+                if messages:
+                    prompt = json.dumps(messages, indent=2, ensure_ascii=False)
+                else:
+                    prompt = "N/A (Prompt data not found in history)"
+            f.write(str(prompt) + "\n\n")
+            
+            # 寫入 LLM 的原始回覆
+            f.write("<<< LLM RAW RESPONSE:\n")
+            response_obj = interaction.get('response', '')
+            if isinstance(response_obj, list) and len(response_obj) > 0:
+                if hasattr(response_obj[0], 'message'):
+                    f.write(str(response_obj[0].message.content) + "\n")
+                else:
+                    f.write(str(response_obj) + "\n")
+            else:
+                f.write(str(response_obj) + "\n")
+            f.write("\n\n")
+            
+    logging.info(f"完整的 Optimizer 互動歷史已儲存至: {history_file}")
 
 if __name__ == "__main__":
     main()

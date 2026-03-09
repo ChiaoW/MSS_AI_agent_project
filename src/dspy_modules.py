@@ -1,11 +1,12 @@
 import os
 import json
+import re
 from datetime import datetime
 import logging
 import dspy
 
 from src.rag_retriever import DynamicFewShotRetriever
-from src.pydantic_schema import OrderInfo, SampleInfo, Stage1Order, Stage2Inference, Stage1Sample
+from src.pydantic_schema import OrderInfo, SampleInfo, Stage1Order, Stage2Inference, Stage1Sample, active_routes
 
 logger = logging.getLogger(__name__)
 
@@ -39,13 +40,23 @@ class Stage1Signature(dspy.Signature):
     RULES:
     1. VENDOR ROLE: You represent MSS. The 'customer' and 'company' refer to external clients. NEVER list MSS or internal employees.
     2. LEARNING FROM HISTORY: Look at the provided historical examples to understand what a valid 'Wafer ID' looks like. DO NOT extract Wafer IDs from the historical cases.
-    3. ANTI-LOOP CRITICAL: DO NOT duplicate Wafer IDs.
+    3. MULTIPLE TESTS: If the same Wafer ID has multiple different test items, locations, or routes, you MUST extract it multiple times as separate entries. Do not omit duplicates if they represent distinct physical tests.
     4. FALLBACK ID: If there is no standard Wafer ID code, but there is a generic description (e.g., "Wafer 1"), extract that as the Wafer ID so the process can continue.
     5. BRIEF REASONING: Keep your reasoning strictly under 50 words. Do not over-explain.
+
+    EXPECTED JSON FORMAT:
+    {
+        "thought_process": "Your step-by-step reasoning logic for finding the entities...",
+        "company": "extracted company name",
+        "customer": "extracted customer name",
+        "wafer_ids": ["Wafer1", "Wafer2"]
+    }
     """
     input_text: str = dspy.InputField(desc="The complete text of the original case (Target Case)")
     historical_examples: str = dspy.InputField(desc="Historical reference cases from the database (please refer to their format, but do not extract the IDs).")
-    output: Stage1Order = dspy.OutputField(desc="Includes customer information and a list of all unique Wafer IDs.")
+    output_schema_instructions: str = dspy.InputField(desc="CRITICAL: You MUST structure your JSON output exactly according to this JSON Schema and obey the descriptions inside.")
+    output: str = dspy.OutputField(desc="CRITICAL: Output ONLY valid JSON matching the schema above. Do not use markdown blocks (```json).")
+    # output: Stage1Order = dspy.OutputField(desc="The JSON object containing reasoning, company, customer, and wafer IDs")
 
 class Stage2Signature(dspy.Signature):
     """
@@ -53,22 +64,34 @@ class Stage2Signature(dspy.Signature):
     Your task is to analyze the ENTIRE provided case text, but extract the exact technical parameters ONLY for the specific TARGET WAFER ID requested.
     
     RULES:
+    - CRITICAL: Output ONLY valid JSON. Do not use markdown blocks like ```json. Do not explain.
     - Explicit Parameters: Use exact parameters if present (e.g., 'ALD(W2-A)', 'M-bond(60/30)').
     - Vague Parameters (History Fallback): If the text uses vague terms (like 'epoxy' or 'ALD'), you MUST look at the historical examples to find the specific recipe used for similar macros.
     - Extra steps: Add '+ Top view', '+ DB', or '+ Probing' if explicitly requested.
     - Route: Select the exact matching standard process route code.
+
+    EXPECTED OUTPUT FORMAT:
+    {
+        "thought_process": "Your step-by-step reasoning logic...",
+        "route": "extracted route string",
+        "prepare": ["step1", "step2"],
+        "loctestkey": "location string"
+    }
     """
     full_context: str = dspy.InputField(desc="The complete text of the original case (Target Case)")
     target_wafer_id: str = dspy.InputField(desc="The specific Wafer ID for which you need to infer the parameters")
     historical_examples: str = dspy.InputField(desc="Historical reference cases (used to infer the true setting of fuzzy parameters)")
-    output: Stage2Inference = dspy.OutputField(desc="The Route, Prepare, and Location corresponding to this Wafer ID")
+    valid_routes: str = dspy.InputField(desc="List of allowed active routes. You MUST choose exactly one route from this list.")
+    output_schema_instructions: str = dspy.InputField(desc="CRITICAL: You MUST structure your JSON output exactly according to this JSON Schema and obey the descriptions inside. Keep your thought process strictly under 50 words.")
+    output: str = dspy.OutputField(desc="CRITICAL: Output ONLY valid JSON matching the schema above. Do not use markdown blocks (```json).")
+    # output: Stage2Inference = dspy.OutputField(desc="The JSON object containing reasoning, route, prepare, and loctestkey")
 
 class SemiconductorExtractor(dspy.Module):
     def __init__(self):
         super().__init__()
         # 使用 ChainOfThought 來強制模型輸出 Pydantic 結構，並加上思考過程
-        self.stage1 = dspy.ChainOfThought(Stage1Signature)
-        self.stage2 = dspy.ChainOfThought(Stage2Signature)
+        self.stage1 = dspy.Predict(Stage1Signature)
+        self.stage2 = dspy.Predict(Stage2Signature)
         # self.retriever = dspy.Retrieve(k=3)
 
         self.latest_input = ""
@@ -85,72 +108,65 @@ class SemiconductorExtractor(dspy.Module):
         
         historical_context = ""
         for idx, passage in enumerate(search_results.passages):
-            truncated_passage = str(passage)[:1500]
+            truncated_passage = str(passage)
             historical_context += f"=== HISTORICAL CASE #{idx+1} ===\n{truncated_passage}\n\n"
 
         self.latest_context = historical_context
+
+        stage1_schema_str = json.dumps(Stage1Order.model_json_schema(), indent=2, ensure_ascii=False)
 
         # --- 步驟 2: 階段一 (實體切分) ---
         logger.info("\n[DSPy] Stage 1: Entity Extraction...")
         s1_pred = self.stage1(
             input_text=input_text, 
-            historical_examples=historical_context
+            historical_examples=historical_context,
+            output_schema_instructions=stage1_schema_str
         )
 
-        s1_output = getattr(s1_pred, "output", None)
+        s1_raw_output = getattr(s1_pred, "output", "")
         
-        if s1_output is None:
-            logger.error("  [Critical] Stage 1 預測結果中找不到 'output' 屬性。")
-            # dspy.inspect_history(n=1)
+        # 進行手動清理與解析 (如同先前的 Retry 邏輯)
+        cleaned_s1 = re.sub(r"<tool_call>.*?<tool_call>", "", str(s1_raw_output), flags=re.DOTALL | re.IGNORECASE)
+        cleaned_s1 = re.sub(r"```json\s*", "", cleaned_s1, flags=re.IGNORECASE)
+        cleaned_s1 = re.sub(r"```", "", cleaned_s1)
+        
+        start_idx = cleaned_s1.find('{')
+        end_idx = cleaned_s1.rfind('}')
+        
+        stage1_samples = []
+        global_analysis, company, customer_name = "", "", ""
+
+        if start_idx != -1 and end_idx != -1:
+            try:
+                parsed_dict = json.loads(cleaned_s1[start_idx : end_idx + 1])
+                stage1_samples = [Stage1Sample(**s) for s in parsed_dict.get("samples", [])]
+                global_analysis = parsed_dict.get("global_analysis", "")
+                company = parsed_dict.get("company", "")
+                customer_name = parsed_dict.get("customer_name", "")
+                logger.info("  [Success] 手動 JSON 清理與解析成功！")
+            except Exception as e:
+                logger.error(f"  [Critical] Stage 1 JSON 解析失敗: {e}")
+                logger.info(f"  原始輸出: {s1_raw_output}")
+                return None
+        else:
+            logger.error(f"  [Critical] Stage 1 找不到有效 JSON。原始輸出: {s1_raw_output}")
+            logger.info(f"  s1_pred: {s1_pred}")
+            logger.info(f"  原始輸出: {s1_raw_output}")
             return None
 
-        # 檢查 DSPy 是否有成功將輸出解析為 Pydantic (Stage1Order)
-        if isinstance(s1_output, Stage1Order):
-            logger.info("  [Success] DSPy 成功自動解析為 Stage1Order Pydantic 物件！")
-            stage1_samples = s1_output.samples
-            global_analysis = s1_output.global_analysis
-            company = s1_output.company
-            customer_name = s1_output.customer_name
-        else:
-            logger.warning(f"  [Warning] DSPy 自動 Pydantic 解析失敗 (抓到 {type(s1_output)})。啟動手動清理與 fallback...")
-
-            raw_text = str(s1_output)
-            logger.debug(f"原始 Stage 1 輸出: {raw_text}")
-            
-            import re, json
-            cleaned = re.sub(r"<tool_call>.*?<tool_call>", "", raw_text, flags=re.DOTALL | re.IGNORECASE)
-            cleaned = re.sub(r"```json\s*", "", cleaned, flags=re.IGNORECASE)
-            cleaned = re.sub(r"```", "", cleaned)
-            
-            start_idx = cleaned.find('{')
-            end_idx = cleaned.rfind('}')
-            if start_idx != -1 and end_idx != -1:
-                try:
-                    parsed_dict = json.loads(cleaned[start_idx : end_idx + 1])
-                    # 將字典轉換為你定義好的 Pydantic 物件
-                    stage1_samples = [Stage1Sample(**s) for s in parsed_dict.get("samples", [])]
-                    global_analysis = parsed_dict.get("global_analysis", "")
-                    company = parsed_dict.get("company", "")
-                    customer_name = parsed_dict.get("customer_name", "")
-                    logger.info("  [Success] 手動 JSON 清理與解析成功！")
-                except Exception as e:
-                    logger.error(f"  [Critical] 手動 JSON 解析失敗: {e}")
-                    # dspy.inspect_history(n=1)
-                    return None
-            else:
-                logger.error("  [Critical] 找不到有效的 JSON 結構。印出原始模型輸出：")
-                logger.debug(f"原始模型輸出: {raw_text}")
-                # dspy.inspect_history(n=1)
-                return None
-
-        # 如果連一個 sample 都沒抓到，提早結束
         if not stage1_samples:
              logger.error("  [Critical] 擷取到的 samples 列表為空。")
+             logger.info(f"  原始輸出: {s1_raw_output}")
              return None
 
         # --- 步驟 3: 階段二 (單一樣本推論) ---
         logger.info("\n[DSPy] Stage 2: Logic Inference...")
         final_samples = []
+
+        # 動態取得 Pydantic Schema 並轉為字串
+        stage2_schema_str = json.dumps(Stage2Inference.model_json_schema(), indent=2, ensure_ascii=False)
+        allowed_routes_str = ", ".join(active_routes)
+        
         for idx, raw_sample in enumerate(stage1_samples):
             if not raw_sample.wafer_id:
                 continue
@@ -158,52 +174,53 @@ class SemiconductorExtractor(dspy.Module):
             logger.info(f"  -> Inferring parameters for Wafer ID: {raw_sample.wafer_id}")
             suffix = f"{idx + 1:03d}"
 
-            try:
-                s2_pred = self.stage2(
-                    full_context=input_text,
-                    target_wafer_id=raw_sample.wafer_id,
-                    historical_examples=historical_context
-                )
-                
-                s2_output = getattr(s2_pred, "output", None)
-                
-                extracted_reasoning = getattr(s2_pred, "reasoning", "")
-                if extracted_reasoning is None:
-                    extracted_reasoning = "Token limit exceeded or no reasoning generated."
-                else:
-                    extracted_reasoning = str(extracted_reasoning)
-                
-                if isinstance(s2_output, Stage2Inference):
-                    route = s2_output.route
-                    prepare = s2_output.prepare
-                    loctestkey = s2_output.loctestkey
-                else:
-                    logger.warning(f"  [Warning] Wafer {raw_sample.wafer_id} 解析 Pydantic 失敗。啟動手動 JSON 清理...")
-                    raw_text2 = str(s2_output)
-                    cleaned2 = re.sub(r"<think>.*?</think>", "", raw_text2, flags=re.DOTALL | re.IGNORECASE)
+            max_retries = 3
+            route, prepare, loctestkey = None, None, None
+            extracted_reasoning = ""
+            
+            for attempt in range(max_retries):
+                try:
+                    s2_pred = self.stage2(
+                        full_context=input_text,
+                        target_wafer_id=raw_sample.wafer_id,
+                        historical_examples=historical_context,
+                        valid_routes=allowed_routes_str,
+                        output_schema_instructions=stage2_schema_str # 注入 Schema
+                    )
+                    
+                    raw_text2 = getattr(s2_pred, "output", "")
+                    
+                    if not raw_text2:
+                        logger.warning(f"  [Attempt {attempt+1}] Stage 2 output is empty. Retrying...")
+                        continue
+
+                    cleaned2 = re.sub(r"<think>.*?</think>", "", str(raw_text2), flags=re.DOTALL | re.IGNORECASE)
                     cleaned2 = re.sub(r"```json\s*", "", cleaned2, flags=re.IGNORECASE)
                     cleaned2 = re.sub(r"```", "", cleaned2)
                     
                     start_idx = cleaned2.find('{')
                     end_idx = cleaned2.rfind('}')
+                    
                     if start_idx != -1 and end_idx != -1:
-                        try:
-                            parsed_dict = json.loads(cleaned2[start_idx : end_idx + 1])
-                            route = parsed_dict.get("route")
-                            prepare = parsed_dict.get("prepare")
-                            loctestkey = parsed_dict.get("loctestkey")
-                            logger.info(f"  [Success] Wafer {raw_sample.wafer_id} 手動 JSON 解析成功！")
-                        except Exception as e:
-                            logger.error(f"  [Critical] Wafer {raw_sample.wafer_id} 手動 JSON 解析失敗: {e}")
-                            route, prepare, loctestkey = None, None, None
-                    else:
-                        logger.error(f"  [Critical] Wafer {raw_sample.wafer_id} 找不到有效的 JSON 結構。")
-                        route, prepare, loctestkey = None, None, None
+                        parsed_dict = json.loads(cleaned2[start_idx : end_idx + 1])
+                        validated_inference = Stage2Inference(**parsed_dict)
+                        
+                        route = validated_inference.route
+                        prepare = validated_inference.prepare
+                        loctestkey = validated_inference.loctestkey
+                        extracted_reasoning = parsed_dict.get("thought_process", "")
+                        
+                        logger.info(f"  [Success] Wafer {raw_sample.wafer_id} 解析成功！")
+                        break
+                        
+                except Exception as e:
+                    logger.warning(f"  [Attempt {attempt+1}] 解析或驗證失敗: {e}")
+                    logger.info(f"  原始輸出: {raw_text2}")
             
-            except Exception as e:
-                logger.error(f"  [Critical] Wafer {raw_sample.wafer_id} 推論崩潰: {e}")
-                route, prepare, loctestkey = "Error", "Error", "Error"
-                extracted_reasoning = f"Error occurred: {str(e)}"
+            if route is None and prepare is None:
+                logger.error(f"  [Critical] Wafer {raw_sample.wafer_id} 推論失敗。")
+                logger.info(f"  原始輸出: {raw_text2}")
+                route, prepare, loctestkey = None, None, None
 
             final_sample = SampleInfo(
                 lot_id=f"{lot_base_name}-{suffix}",
@@ -227,7 +244,7 @@ class SemiconductorExtractor(dspy.Module):
             historical_context=historical_context
         )
     
-
+# Haven't used this yet.
 def save_debug_prompt(lot_id: str, llm_instance, input_text: str, historical_context: str):
     """將 Input, Context 與 LLM 互動紀錄完整存入檔案"""
     output_dir = "data/output/debug_prompt"
