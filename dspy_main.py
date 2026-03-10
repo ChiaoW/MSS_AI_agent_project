@@ -31,7 +31,7 @@ llm = dspy.LM(
     api_base=LLM_API_BASE,
     api_key="EMPTY",  
     temperature=0,  
-    max_tokens=4096,
+    max_tokens=5000,
     cache=False
 )
 
@@ -89,11 +89,35 @@ def process_lot_request(lot_directory: str):
 
 
 if __name__ == "__main__":
-    # 測試用的案例資料夾
-    cases = [
-        # "data/raw/all_cases/T25100101"
-        "data/raw/Kang_Yi_Lin_Merged/T251020101",
-    ]
+    # Load test cases from answers_20226.json
+    answers_path = "data/reference/answers/answers_2026.json"
+    raw_base_path = "data/raw/all_cases"
+    cases = []
+
+    if os.path.exists(answers_path):
+        try:
+            with open(answers_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            
+            # Handle Dict format (Key = Lot ID)
+            if isinstance(data, dict):
+                for lot_id in data.keys():
+                    cases.append(os.path.join(raw_base_path, lot_id))
+            
+            # Handle List format (extract base Lot ID from samples)
+            elif isinstance(data, list):
+                for item in data:
+                    samples = item.get("samples", [])
+                    if samples and "lot_id" in samples[0]:
+                        # e.g., "T26012301-001" -> "T26012301"
+                        full_id = samples[0]["lot_id"]
+                        base_id = full_id.split("-")[0]
+                        cases.append(os.path.join(raw_base_path, base_id))
+        except Exception as e:
+            logging.error(f"Error loading answers file: {e}")
+
+    # Deduplicate
+    cases = sorted(list(set(cases)))
 
     results = []
 
@@ -120,7 +144,7 @@ if __name__ == "__main__":
     # 將結果存檔
     os.makedirs("data/output/prediction_results", exist_ok=True)
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-    out_fname = f"data/output/prediction_results/dspy_results_{ts}.txt"
+    out_fname = f"data/output/prediction_results/dspy_results_2026_{ts}.txt"
     
     with open(out_fname, "w", encoding="utf-8") as outf:
         for case_dir, content in results:
